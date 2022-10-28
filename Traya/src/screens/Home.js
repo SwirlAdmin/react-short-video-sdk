@@ -11,17 +11,19 @@ import {
   Modal,
   Pressable,
   Alert,
+  ScrollView,
 } from 'react-native';
 import {NativeBaseProvider, Box} from 'native-base';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import VideoPlayer from 'react-native-video-player';
 import CustomIcon from '../components/Icon';
-
 // create a component
 const HomeScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [isPause, setIsPaused] = useState(false);
 
   const data = [
     {
@@ -79,20 +81,104 @@ const HomeScreen = () => {
       />
 
       <Modal
-        animationType="fade"
-        transparent={true}
+        animationType="none"
+        transparent={false}
         visible={modalVisible}
         onRequestClose={() => {
           Alert.alert('Modal has been closed.');
           setModalVisible(!modalVisible);
         }}>
-        <View style={{flex: 1, backgroundColor: '#69cc98'}}>
-          <Text>hi</Text>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            backgroundColor: '#69cc98',
+          }}>
+          <VideoPlayer
+            video={{
+              uri: 'https://video.gumlet.io/621770ca1c8b821b05d7035a/62a2d8b9773f80afa9e914a4/main.mp4',
+            }}
+            hideControlsOnStart
+            autoplay
+            loop
+            // customStyles={{seekBarBackground: 'green'}}
+            // seek={3}
+            // endWithThumbnail
+            // useTextureView
+            resizeMode={'cover'}
+            controls={false}
+            pauseOnPress
+            volume={1}
+            videoWidth={wp('100')}
+            videoHeight={hp('97.5')}
+            thumbnail={{
+              uri: 'https://swirl-assets.s3.ap-south-1.amazonaws.com/video/image/62c818af3283c29113_H1-8901030851667-removebg-preview_600x600_crop_center.png',
+            }}
+          />
           {/* <CustomIcon name={'add'} color={'red'} size={18} /> */}
-          <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
-            <Text>Cut</Text>
-          </TouchableOpacity>
-        </View>
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              justifyContent: 'space-between',
+            }}>
+            <View style={{flexDirection: 'row'}}>
+              <TouchableOpacity>
+                <CustomIcon
+                  style={{marginHorizontal: wp('1'), marginVertical: hp('1')}}
+                  name={'ellipsis-vertical'}
+                  color={'#fff'}
+                  size={25}
+                />
+              </TouchableOpacity>
+              <Text
+                style={{
+                  color: '#fff',
+                  fontSize: 18,
+                  justifyContent: 'center',
+                  alignSelf: 'center',
+                }}>
+                Sumit Testimonial
+              </Text>
+            </View>
+          </View>
+          <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              right: 0,
+              justifyContent: 'space-between',
+            }}>
+            <View style={{flexDirection: 'row'}}>
+              <TouchableOpacity>
+                <CustomIcon
+                  style={{marginHorizontal: wp('1'), marginVertical: hp('1')}}
+                  name={'scan-circle-outline'}
+                  color={'#fff'}
+                  size={35}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <CustomIcon
+                  style={{marginHorizontal: wp('1'), marginVertical: hp('1')}}
+                  name={'volume-low-outline'}
+                  color={'#fff'}
+                  size={35}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
+                <CustomIcon
+                  style={{marginHorizontal: wp('1'), marginVertical: hp('1')}}
+                  name={'close-circle-outline'}
+                  color={'#fff'}
+                  size={35}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
       </Modal>
     </ImageBackground>
   );
