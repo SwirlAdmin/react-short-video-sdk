@@ -6647,6 +6647,11 @@ react-native-keyboard-aware-scroll-view@^0.9.5:
     prop-types "^15.6.2"
     react-native-iphone-x-helper "^1.0.3"
 
+react-native-linear-gradient@^2.6.2:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/react-native-linear-gradient/-/react-native-linear-gradient-2.6.2.tgz#56598a76832724b2afa7889747635b5c80948f38"
+  integrity sha512-Z8Xxvupsex+9BBFoSYS87bilNPWcRfRsGC0cpJk72Nxb5p2nEkGSBv73xZbEHnW2mUFvP+huYxrVvjZkr/gRjQ==
+
 react-native-responsive-screen@^1.4.2:
   version "1.4.2"
   resolved "https://registry.npmjs.org/react-native-responsive-screen/-/react-native-responsive-screen-1.4.2.tgz"
@@ -6672,6 +6677,11 @@ react-native-svg@12.1.1:
   dependencies:
     css-select "^2.1.0"
     css-tree "^1.0.0-alpha.39"
+
+react-native-swiper-flatlist@^3.0.17:
+  version "3.0.17"
+  resolved "https://registry.yarnpkg.com/react-native-swiper-flatlist/-/react-native-swiper-flatlist-3.0.17.tgz#fd9ca81db7d2cc67f85265bf5d6a3b0771692679"
+  integrity sha512-4sWHzMHhXohiePBtJcVwt/fYVLpKFab7H1bvUH8TI3iMFYTOlMaW2PerlTDqGSO1eLRc4BX1z3X6e1NYPoakMA==
 
 react-native-vector-icons@^9.2.0:
   version "9.2.0"
