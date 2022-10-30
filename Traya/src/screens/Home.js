@@ -9,7 +9,11 @@ import {
   FlatList,
   TouchableOpacity,
   Modal,
-  Alert,
+  Dimensions,
+  ActivityIndicator,
+  ScrollView,
+  RefreshControl,
+  Share,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -19,12 +23,22 @@ import CustomIcon from '../components/Icon';
 import Video from 'react-native-video';
 import {useTogglePasswordVisibility} from '../components/ShowHide';
 import {SwiperFlatList} from 'react-native-swiper-flatlist';
+import BottomBtns from '../components/BottomBtns';
+import ShortBtn from '../components/ShortBtn';
+import Chevrons from '../components/Chevrons';
 
 // create a component
 const HomeScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [currIndex, setIndex] = useState();
   const [apiRes, setApiRes] = useState();
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [serverLength, setServerLength] = useState(0);
+
+  const windowWidth = Dimensions.get('window').width;
+  const windowHeight = Dimensions.get('window').height;
+  console.log(windowHeight, 'windowHeight');
 
   console.log(currIndex, 'currIndex is');
   const {
@@ -43,13 +57,10 @@ const HomeScreen = () => {
   const onError = e => {
     console.log('Error raised.....', e);
   };
-  // useEffect(() => {
-  //   if (!!videoRef.current) {
-  //     videoRef.current.seek(0);
-  //   }
-  // }, [currIndex]);
 
   const GetData = () => {
+    setLoading(true);
+
     var myHeaders = new Headers();
     myHeaders.append(
       'Cookie',
@@ -73,10 +84,26 @@ const HomeScreen = () => {
     )
       .then(response => response.json())
       .then(result => {
-        // console.log(result?.Response?.videos, 'my data');
+        const datais = result?.Response?.videos;
+        let serverLinks = datais.filter(val => {
+          if (val.server_url) {
+            return val.server_url;
+          }
+        });
+        setServerLength(serverLinks.length);
+        console.log(serverLinks.length, 'length of server links');
         setApiRes(result?.Response?.videos);
+        setLoading(false);
+        setRefreshing(false);
       })
       .catch(error => console.log('error', error));
+  };
+  const onRefresh = () => {
+    setRefreshing(true);
+    setTimeout(() => {
+      GetData();
+      setRefreshing(false);
+    }, 2000);
   };
   useEffect(() => {
     GetData();
@@ -86,7 +113,8 @@ const HomeScreen = () => {
       videoRef.current.seek(0);
     }
   }, [currIndex]);
-  console.log(apiRes, 'result?.Response?.videos');
+  console.log(apiRes, 'resdsadult?.Response?.videos');
+  console.log(loading, 'is there');
   const dummydata = [
     {
       id: 1,
@@ -114,15 +142,48 @@ const HomeScreen = () => {
   //     link: 'https://video.gumlet.io/621770ca1c8b821b05d7035a/62a2d8b9773f80afa9e914a4/main.mp4',
   //   },
   // ];
-  const renderItem = ({item, index}) => {
-    console.log(item?.server_url, 'inddsadsffeer');
+  const scrollRef = useRef();
 
-    return (
+  const goToPreviousIndex = () => {
+    const currIndex = scrollRef.current.getCurrentIndex();
+    console.log(currIndex, 'backhere');
+    if (currIndex > -1) {
+      scrollRef.current.scrollToIndex({index: currIndex - 1});
+    }
+  };
+  const goToNextIndex = () => {
+    const currIndex = scrollRef.current.getCurrentIndex();
+    console.log(currIndex, 'for index is');
+
+    console.log(currIndex - 1 > 0, 'fordsad here');
+    if (currIndex > -1) {
+      scrollRef.current.scrollToIndex({index: currIndex + 1});
+    } else {
+      scrollRef.current.scrollToIndex({index: currIndex});
+    }
+  };
+  // const rrr = apiRes;
+  // console.log(rrr.cover_image, 'rrvdxfrrrdfasdsf');
+  const renderItem = ({item, index}) => {
+    // console.log(
+    //   Object.keys(item?.server_url).length,
+    //   'inddddsadsdsadscdfffeer',
+    // );
+    // Object.keys(item?.server_url).length
+    return loading == true ? (
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <ActivityIndicator />
+      </ScrollView>
+    ) : (
       <>
         <View
           style={{
             paddingVertical: hp('0.2'),
             backgroundColor: '#000',
+            height: windowHeight,
           }}>
           <Video
             // playInBackground={true}
@@ -137,13 +198,14 @@ const HomeScreen = () => {
             poster={item?.cover_image}
             posterResizeMode={'cover'}
             ref={videoRef}
+            autoplayLoopKeepAnimation
             resizeMode="cover"
             onBuffer={onBuffer}
             onError={onError}
             repeat
             paused={currIndex !== index}
             // paused={true}
-            style={{width: wp('100'), height: hp('97')}}
+            style={{width: wp('100'), height: windowHeight}}
           />
         </View>
         <View
@@ -181,15 +243,16 @@ const HomeScreen = () => {
             justifyContent: 'space-between',
           }}>
           <View style={{flexDirection: 'row'}}>
-            <TouchableOpacity>
+            <TouchableOpacity
+              style={{alignItems: 'center', justifyContent: 'center'}}>
               <CustomIcon
                 style={{
-                  marginHorizontal: wp('1'),
+                  marginHorizontal: wp('3'),
                   marginVertical: hp('1'),
                 }}
-                name={'scan-circle-outline'}
+                name={'scan-outline'}
                 color={'#fff'}
-                size={35}
+                size={25}
               />
             </TouchableOpacity>
 
@@ -210,12 +273,64 @@ const HomeScreen = () => {
                   marginHorizontal: wp('1'),
                   marginVertical: hp('1'),
                 }}
-                name={'close-circle-outline'}
+                name={'close-outline'}
                 color={'#fff'}
                 size={35}
               />
             </TouchableOpacity>
           </View>
+        </View>
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+          }}>
+          <BottomBtns />
+        </View>
+        <View
+          style={{
+            position: 'absolute',
+            bottom: hp('2'),
+            right: wp('2'),
+          }}>
+          <ShortBtn title={'Take The Hair Test'} />
+        </View>
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            alignSelf: 'center',
+          }}>
+          <Chevrons
+            style={
+              currIndex == -1 || currIndex == 0 || currIndex == undefined
+                ? {display: 'none'}
+                : null
+            }
+            onPress={
+              currIndex == -1 || currIndex == 0 || currIndex == undefined
+                ? () => alert('hi')
+                : goToPreviousIndex
+            }
+            IconName={'chevron-back'}
+          />
+        </View>
+        <View
+          style={{
+            position: 'absolute',
+            right: 0,
+            alignSelf: 'center',
+          }}>
+          <Chevrons
+            style={
+              currIndex == serverLength - 1 || currIndex == undefined
+                ? {display: 'none'}
+                : null
+            }
+            onPress={goToNextIndex}
+            IconName={'chevron-forward'}
+          />
         </View>
       </>
     );
@@ -265,15 +380,39 @@ const HomeScreen = () => {
         transparent={false}
         visible={modalVisible}
         onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
+          // Alert.alert('Modal has been closed.');
           setModalVisible(!modalVisible);
         }}>
-        <SwiperFlatList
-          vertical
-          data={apiRes}
-          renderItem={renderItem}
-          onChangeIndex={onChangeIndex}
-        />
+        {loading ? (
+          <ScrollView
+            contentContainerStyle={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
+            <ActivityIndicator size={'large'} color="#b9d446" />
+            <Text
+              style={{
+                fontSize: 16,
+                marginVertical: hp('4'),
+                textAlign: 'center',
+              }}>
+              trying to connect...{'\n'}pull for retry...
+            </Text>
+          </ScrollView>
+        ) : (
+          <SwiperFlatList
+            ref={scrollRef}
+            horizontal
+            paginationActiveColor="red"
+            data={apiRes}
+            renderItem={renderItem}
+            onChangeIndex={onChangeIndex}
+          />
+        )}
       </Modal>
     </ImageBackground>
   );
