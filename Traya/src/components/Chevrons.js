@@ -15,8 +15,8 @@ const Chevrons = props => {
           marginVertical: hp('1'),
         }}
         name={props.IconName}
-        color={'#fff'}
-        size={35}
+        color={props.color ? props.color : '#fff'}
+        size={props.size ? props.size : 35}
       />
     </TouchableOpacity>
   );

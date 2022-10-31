@@ -14,6 +14,9 @@ import {
   ScrollView,
   RefreshControl,
   Share,
+  Pressable,
+  Button,
+  StatusBar,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -26,10 +29,18 @@ import {SwiperFlatList} from 'react-native-swiper-flatlist';
 import BottomBtns from '../components/BottomBtns';
 import ShortBtn from '../components/ShortBtn';
 import Chevrons from '../components/Chevrons';
-import {useToast} from 'native-base';
-
+import {
+  AspectRatio,
+  Box,
+  Center,
+  Heading,
+  HStack,
+  Stack,
+  TextArea,
+  useToast,
+} from 'native-base';
 // create a component
-const HomeScreen = () => {
+const HomeScreen = props => {
   const [modalVisible, setModalVisible] = useState(false);
   const [currIndex, setIndex] = useState();
   const [apiRes, setApiRes] = useState();
@@ -37,7 +48,8 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [serverLength, setServerLength] = useState(0);
   const [askQueBox, setAskQueBox] = useState(false);
-
+  const [userMsg, setUserMsg] = useState('');
+  // console.log(textAreaValue, 'textAreaValue');
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
   console.log(windowHeight, 'windowHeight');
@@ -102,11 +114,33 @@ const HomeScreen = () => {
       })
       .catch(error => console.log('error', error));
   };
+  const AskQuestion = (_uid, _did, _sid, _msg) => {
+    var myHeaders = new Headers();
+    myHeaders.append('Cookie', 'ci_session=okq9kvlc524s3ho346fjr08075g4q692');
+
+    var formdata = new FormData();
+    formdata.append('user_id', _uid);
+    formdata.append('designer_id', _did);
+    formdata.append('msg', _msg);
+    formdata.append('swirls_id', _sid);
+
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: formdata,
+      redirect: 'follow',
+    };
+
+    fetch('https://api.goswirl.live/index.php/Shopify/askque', requestOptions)
+      .then(response => response.json())
+      .then(result => console.log(result, '_mdadsaddssg'))
+      .catch(error => console.log('error', error));
+  };
   const onRefresh = () => {
-    setRefreshing(true);
+    // setRefreshing(true);
     setTimeout(() => {
       GetData();
-      setRefreshing(false);
+      // setRefreshing(false);
     }, 2000);
   };
   // if (currIndex == 0) {
@@ -119,11 +153,11 @@ const HomeScreen = () => {
   useEffect(() => {
     GetData();
   }, []);
-  // useEffect(() => {
-  //   if (!!videoRef.current) {
-  //     videoRef.current.seek(0);
-  //   }
-  // }, [currIndex]);
+  useEffect(() => {
+    if (currIndex == 0 || currIndex == 1) {
+      videoRef.current.seek(0);
+    }
+  }, [currIndex]);
   console.log(apiRes, 'resdsadult?.Response?.videos');
   console.log(loading, 'is there');
   const dummydata = [
@@ -176,6 +210,25 @@ const HomeScreen = () => {
   // const rrr = apiRes;
   // console.log(rrr.cover_image, 'rrvdxfrrrdfasdsf');
   const renderItem = ({item, index}) => {
+    console.log(item.designer_id, 'designer_id');
+    const onShare = async () => {
+      try {
+        const result = await Share.share({
+          message: item?.server_url,
+        });
+        if (result.action === Share.sharedAction) {
+          if (result.activityType) {
+            // shared with activity type of result.activityType
+          } else {
+            // shared
+          }
+        } else if (result.action === Share.dismissedAction) {
+          // dismissed
+        }
+      } catch (error) {
+        alert(error.message);
+      }
+    };
     // console.log(
     //   Object.keys(item?.server_url).length,
     //   'inddddsadsdsadscdfffeer',
@@ -206,10 +259,10 @@ const HomeScreen = () => {
             source={{
               uri: item?.server_url,
             }}
+            // onSeek={data => console.log('onSeek', data)}
             poster={item?.cover_image}
             posterResizeMode={'cover'}
             ref={videoRef}
-            autoplayLoopKeepAnimation
             resizeMode="cover"
             onBuffer={onBuffer}
             onError={onError}
@@ -297,7 +350,10 @@ const HomeScreen = () => {
             bottom: 0,
             left: 0,
           }}>
-          <BottomBtns />
+          <BottomBtns
+            sharePress={onShare}
+            chatPress={() => setAskQueBox(true)}
+          />
         </View>
         <View
           style={{
@@ -305,7 +361,10 @@ const HomeScreen = () => {
             bottom: hp('2'),
             right: wp('2'),
           }}>
-          <ShortBtn title={'Take The Hair Test'} />
+          <ShortBtn
+            onPress={() => alert('clicked!')}
+            title={'Take The Hair Test'}
+          />
         </View>
         {/* <View
           style={{
@@ -355,6 +414,12 @@ const HomeScreen = () => {
         uri: 'https://www.nicepng.com/png/full/447-4478234_starburst-background-png-clipart-royalty-free-stock-starburst.png',
       }}
       style={{flex: 1}}>
+      <StatusBar
+        barStyle="dark-content"
+        hidden={false}
+        backgroundColor="#b8d445"
+        // translucent={true}
+      />
       <FlatList
         style={{flex: 1}}
         data={dummydata}
@@ -387,7 +452,7 @@ const HomeScreen = () => {
       />
 
       <Modal
-        animationType="none"
+        animationType="fade"
         transparent={false}
         visible={modalVisible}
         onRequestClose={() => {
@@ -398,21 +463,64 @@ const HomeScreen = () => {
           <ScrollView
             contentContainerStyle={{
               flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
+              backgroundColor: '#000',
             }}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }>
-            <ActivityIndicator size={'large'} color="#b9d446" />
-            <Text
+            // refreshControl={
+            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            // }
+          >
+            <View
               style={{
-                fontSize: 16,
-                marginVertical: hp('4'),
-                textAlign: 'center',
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
               }}>
-              trying to connect...{'\n'}pull for retry...
-            </Text>
+              <Text
+                style={{
+                  fontSize: 22,
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  color: '#fff',
+                }}>
+                Your internet seems to be slow
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  marginVertical: hp('2'),
+                  textAlign: 'center',
+                  width: wp('80'),
+                  color: '#fff',
+                }}>
+                Check you internet connection and try again
+              </Text>
+              <TouchableOpacity
+                onPress={onRefresh}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: '#b9d446',
+                  width: wp('80%'),
+                  justifyContent: 'center',
+                }}>
+                <CustomIcon
+                  name={'reload'}
+                  size={20}
+                  style={{paddingVertical: hp('1.5')}}
+                  color={'#fff'}
+                  // onPress={() => setAskQueBox(!modalVisible)}
+                />
+                <Text
+                  style={{
+                    fontWeight: '500',
+                    marginLeft: wp('2'),
+                    fontSize: 16,
+                    color: '#fff',
+                  }}>
+                  TRY AGAIN
+                </Text>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
         ) : (
           <SwiperFlatList
@@ -425,6 +533,97 @@ const HomeScreen = () => {
           />
         )}
       </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={askQueBox}
+        onRequestClose={() => {
+          //   Alert.alert("Modal has been closed.");
+          setAskQueBox(!askQueBox);
+        }}>
+        <Box alignItems="center" justifyContent={'center'} flex={1}>
+          <Box
+            maxW="80"
+            rounded="lg"
+            overflow="hidden"
+            borderColor="coolGray.200"
+            borderWidth="1"
+            _dark={{
+              borderColor: 'coolGray.600',
+              backgroundColor: 'gray.700',
+            }}
+            _web={{
+              shadow: 2,
+              borderWidth: 0,
+            }}
+            _light={{
+              backgroundColor: 'gray.50',
+            }}>
+            <Box>
+              {/* <View style={{backgroundColor: 'red', width: '100%'}}>
+                <Text>jsdnfkdf</Text>
+              </View> */}
+              <View
+                style={{
+                  backgroundColor: '#b8d445',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  paddingVertical: hp('0.5'),
+                  alignItems: 'center',
+                  paddingHorizontal: hp('1'),
+                }}>
+                <Text
+                  style={{
+                    color: '#000',
+                    fontSize: 16,
+                    fontWeight: '500',
+                  }}>
+                  Ask Question
+                </Text>
+                <Chevrons
+                  IconName={'close'}
+                  size={20}
+                  color={'#000'}
+                  onPress={() => setAskQueBox(!modalVisible)}
+                />
+              </View>
+            </Box>
+            <Stack p="4" space={3}>
+              <Stack space={12}>
+                <TextArea
+                  value={userMsg}
+                  onChange={e => setUserMsg(e.currentTarget.value)} // for web
+                  onChangeText={text => setUserMsg(text)}
+                  h={20}
+                  placeholder="Type Here"
+                  w={400}
+                  maxW="100%"
+                />
+              </Stack>
+
+              <HStack alignItems="center" justifyContent={'center'}>
+                {/* <Button
+                  title="Send"
+                  color="#b8d445"
+                  accessibilityLabel="ask questions from traya"
+                /> */}
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#b8d445',
+                    paddingVertical: hp('0.8'),
+                    paddingHorizontal: wp('10'),
+                    borderRadius: 22,
+                  }}
+                  onPress={() =>
+                    AskQuestion(18580, 1234, 3412, userMsg, item.designer_id)
+                  }>
+                  <Text style={{color: '#000'}}>Send</Text>
+                </TouchableOpacity>
+              </HStack>
+            </Stack>
+          </Box>
+        </Box>
+      </Modal>
     </ImageBackground>
   );
 };
@@ -435,6 +634,47 @@ const styles = StyleSheet.create({
     width: wp('60'),
     height: hp('30'),
     borderRadius: 22,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
 

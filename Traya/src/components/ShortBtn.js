@@ -9,7 +9,7 @@ import {
 // create a component
 const ShortBtn = props => {
   return (
-    <TouchableOpacity style={styles.btnStyle}>
+    <TouchableOpacity onPress={props.onPress} style={styles.btnStyle}>
       <Text style={styles.textStyle}>{props.title}</Text>
     </TouchableOpacity>
   );
