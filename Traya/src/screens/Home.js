@@ -26,6 +26,7 @@ import {SwiperFlatList} from 'react-native-swiper-flatlist';
 import BottomBtns from '../components/BottomBtns';
 import ShortBtn from '../components/ShortBtn';
 import Chevrons from '../components/Chevrons';
+import {useToast} from 'native-base';
 
 // create a component
 const HomeScreen = () => {
@@ -35,6 +36,7 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [serverLength, setServerLength] = useState(0);
+  const [askQueBox, setAskQueBox] = useState(false);
 
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
@@ -51,6 +53,8 @@ const HomeScreen = () => {
   } = useTogglePasswordVisibility();
   const [password, setPassword] = useState('');
   const videoRef = useRef();
+  const toast = useToast();
+
   const onBuffer = e => {
     console.log('Buffering.....', e);
   };
@@ -105,14 +109,21 @@ const HomeScreen = () => {
       setRefreshing(false);
     }, 2000);
   };
+  // if (currIndex == 0) {
+  //   useEffect(() => {
+  //     toast.show({
+  //       description: 'Hello world',
+  //     });
+  //   });
+  // }
   useEffect(() => {
     GetData();
   }, []);
-  useEffect(() => {
-    if (!!videoRef.current) {
-      videoRef.current.seek(0);
-    }
-  }, [currIndex]);
+  // useEffect(() => {
+  //   if (!!videoRef.current) {
+  //     videoRef.current.seek(0);
+  //   }
+  // }, [currIndex]);
   console.log(apiRes, 'resdsadult?.Response?.videos');
   console.log(loading, 'is there');
   const dummydata = [
@@ -296,7 +307,7 @@ const HomeScreen = () => {
           }}>
           <ShortBtn title={'Take The Hair Test'} />
         </View>
-        <View
+        {/* <View
           style={{
             position: 'absolute',
             left: 0,
@@ -331,7 +342,7 @@ const HomeScreen = () => {
             onPress={goToNextIndex}
             IconName={'chevron-forward'}
           />
-        </View>
+        </View> */}
       </>
     );
   };
