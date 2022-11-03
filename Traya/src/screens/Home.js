@@ -49,6 +49,13 @@ const HomeScreen = props => {
   const [serverLength, setServerLength] = useState(0);
   const [askQueBox, setAskQueBox] = useState(false);
   const [userMsg, setUserMsg] = useState('');
+  const [shouldShow, setShouldShow] = useState(false);
+  const [buffering, setBuffering] = useState(true);
+  const [isAlertVisible, setIsAlertVisible] = React.useState(false);
+
+  const handleButtonClick = () => {
+    setIsAlertVisible(true);
+  };
   // console.log(textAreaValue, 'textAreaValue');
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
@@ -67,13 +74,13 @@ const HomeScreen = props => {
   const videoRef = useRef();
   const toast = useToast();
 
-  const onBuffer = e => {
-    console.log('Buffering.....', e);
+  const onBuffer = ({isBuffering}) => {
+    setBuffering(isBuffering);
   };
   const onError = e => {
     console.log('Error raised.....', e);
   };
-
+  console.log(buffering, 'buffering......');
   const GetData = () => {
     setLoading(true);
 
@@ -153,11 +160,11 @@ const HomeScreen = props => {
   useEffect(() => {
     GetData();
   }, []);
-  useEffect(() => {
-    if (currIndex == 0 || currIndex == 1) {
-      videoRef.current.seek(0);
-    }
-  }, [currIndex]);
+  // useEffect(() => {
+  //   if (currIndex == 0 || currIndex == 1) {
+  //     videoRef.current.seek(0);
+  //   }
+  // }, [currIndex]);
   console.log(apiRes, 'resdsadult?.Response?.videos');
   console.log(loading, 'is there');
   const dummydata = [
@@ -267,7 +274,7 @@ const HomeScreen = props => {
             onBuffer={onBuffer}
             onError={onError}
             repeat
-            paused={currIndex !== index}
+            paused={currIndex !== index || shouldShow ? true : false}
             // paused={true}
             style={{width: wp('100'), height: windowHeight}}
           />
@@ -344,6 +351,104 @@ const HomeScreen = props => {
             </TouchableOpacity>
           </View>
         </View>
+        {shouldShow ? (
+          <Box
+            alignItems="center"
+            position={'absolute'}
+            alignSelf={'center'}
+            left={12}
+            shadow="9">
+            <Box
+              shadow="9"
+              maxW="80"
+              rounded="lg"
+              overflow="hidden"
+              borderColor="coolGray.200"
+              borderWidth="1"
+              _dark={{
+                borderColor: 'coolGray.600',
+                backgroundColor: 'gray.700',
+              }}
+              _web={{
+                shadow: 9,
+                borderWidth: 0,
+              }}
+              _light={{
+                backgroundColor: 'gray.50',
+              }}>
+              <Box>
+                {/* <View style={{backgroundColor: 'red', width: '100%'}}>
+                 <Text>jsdnfkdf</Text>
+               </View> */}
+                <View
+                  style={{
+                    backgroundColor: '#b8d445',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    paddingVertical: hp('0.5'),
+                    alignItems: 'center',
+                    paddingHorizontal: hp('1'),
+                  }}>
+                  <Text
+                    style={{
+                      color: '#000',
+                      fontSize: 16,
+                      fontWeight: '500',
+                    }}>
+                    Ask Question
+                  </Text>
+
+                  <Chevrons
+                    IconName={'close'}
+                    size={20}
+                    color={'#000'}
+                    onPress={() => setShouldShow(false)}
+                  />
+                </View>
+              </Box>
+              <Stack p="4" space={3}>
+                <Stack space={12}>
+                  <TextArea
+                    value={userMsg}
+                    onChange={e => setUserMsg(e.currentTarget.value)} // for web
+                    onChangeText={text => setUserMsg(text)}
+                    h={20}
+                    placeholder="Type Here"
+                    w={400}
+                    maxW="100%"
+                  />
+                </Stack>
+
+                <HStack alignItems="center" justifyContent={'center'}>
+                  {/* <Button
+                   title="Send"
+                   color="#b8d445"
+                   accessibilityLabel="ask questions from traya"
+                 /> */}
+                  <TouchableOpacity
+                    disabled={userMsg.length == '' ? true : false}
+                    style={{
+                      backgroundColor:
+                        userMsg.length == '' ? '#d3d3d3' : '#b8d445',
+                      paddingVertical: hp('0.8'),
+                      paddingHorizontal: wp('10'),
+                      borderRadius: 22,
+                    }}
+                    onPress={() => {
+                      AskQuestion(18580, 1234, 3412, userMsg, item.designer_id),
+                        setShouldShow(false);
+                      setUserMsg('');
+                    }}>
+                    <Text
+                      style={{color: userMsg.length == '' ? '#fff' : '#000'}}>
+                      Send
+                    </Text>
+                  </TouchableOpacity>
+                </HStack>
+              </Stack>
+            </Box>
+          </Box>
+        ) : null}
         <View
           style={{
             position: 'absolute',
@@ -352,13 +457,27 @@ const HomeScreen = props => {
           }}>
           <BottomBtns
             sharePress={onShare}
-            chatPress={() => setAskQueBox(true)}
+            chatPress={() => setShouldShow(true)}
           />
         </View>
         <View
           style={{
             position: 'absolute',
-            bottom: hp('2'),
+            left: 0,
+            alignSelf: 'center',
+            right: 12,
+          }}>
+          <ActivityIndicator
+            animating
+            size="large"
+            color={'#bfd85b'}
+            style={buffering ? {opacity: 1} : {opacity: 0}}
+          />
+        </View>
+        <View
+          style={{
+            position: 'absolute',
+            bottom: hp('1'),
             right: wp('2'),
           }}>
           <ShortBtn
@@ -526,7 +645,7 @@ const HomeScreen = props => {
           <SwiperFlatList
             ref={scrollRef}
             horizontal
-            paginationActiveColor="red"
+            scrollEnabled={shouldShow ? false : true}
             data={apiRes}
             renderItem={renderItem}
             onChangeIndex={onChangeIndex}
@@ -540,90 +659,7 @@ const HomeScreen = props => {
         onRequestClose={() => {
           //   Alert.alert("Modal has been closed.");
           setAskQueBox(!askQueBox);
-        }}>
-        <Box alignItems="center" justifyContent={'center'} flex={1}>
-          <Box
-            maxW="80"
-            rounded="lg"
-            overflow="hidden"
-            borderColor="coolGray.200"
-            borderWidth="1"
-            _dark={{
-              borderColor: 'coolGray.600',
-              backgroundColor: 'gray.700',
-            }}
-            _web={{
-              shadow: 2,
-              borderWidth: 0,
-            }}
-            _light={{
-              backgroundColor: 'gray.50',
-            }}>
-            <Box>
-              {/* <View style={{backgroundColor: 'red', width: '100%'}}>
-                <Text>jsdnfkdf</Text>
-              </View> */}
-              <View
-                style={{
-                  backgroundColor: '#b8d445',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  paddingVertical: hp('0.5'),
-                  alignItems: 'center',
-                  paddingHorizontal: hp('1'),
-                }}>
-                <Text
-                  style={{
-                    color: '#000',
-                    fontSize: 16,
-                    fontWeight: '500',
-                  }}>
-                  Ask Question
-                </Text>
-                <Chevrons
-                  IconName={'close'}
-                  size={20}
-                  color={'#000'}
-                  onPress={() => setAskQueBox(!modalVisible)}
-                />
-              </View>
-            </Box>
-            <Stack p="4" space={3}>
-              <Stack space={12}>
-                <TextArea
-                  value={userMsg}
-                  onChange={e => setUserMsg(e.currentTarget.value)} // for web
-                  onChangeText={text => setUserMsg(text)}
-                  h={20}
-                  placeholder="Type Here"
-                  w={400}
-                  maxW="100%"
-                />
-              </Stack>
-
-              <HStack alignItems="center" justifyContent={'center'}>
-                {/* <Button
-                  title="Send"
-                  color="#b8d445"
-                  accessibilityLabel="ask questions from traya"
-                /> */}
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: '#b8d445',
-                    paddingVertical: hp('0.8'),
-                    paddingHorizontal: wp('10'),
-                    borderRadius: 22,
-                  }}
-                  onPress={() =>
-                    AskQuestion(18580, 1234, 3412, userMsg, item.designer_id)
-                  }>
-                  <Text style={{color: '#000'}}>Send</Text>
-                </TouchableOpacity>
-              </HStack>
-            </Stack>
-          </Box>
-        </Box>
-      </Modal>
+        }}></Modal>
     </ImageBackground>
   );
 };

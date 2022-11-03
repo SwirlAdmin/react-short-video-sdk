@@ -25,8 +25,8 @@ const styles = StyleSheet.create({
   },
   btnStyle: {
     backgroundColor: '#bfd85b',
-    paddingHorizontal: widthPercentageToDP('4'),
-    paddingVertical: heightPercentageToDP('1'),
+    paddingHorizontal: widthPercentageToDP('8'),
+    paddingVertical: heightPercentageToDP('1.5'),
     borderRadius: 22,
   },
   textStyle: {

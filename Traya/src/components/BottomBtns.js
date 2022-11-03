@@ -16,7 +16,8 @@ import CustomIcon from './Icon';
 // create a component
 const BottomBtns = props => {
   return (
-    <SafeAreaView style={{flexDirection: 'row', marginHorizontal: wp('4')}}>
+    <SafeAreaView
+      style={{flexDirection: 'column-reverse', marginHorizontal: wp('4')}}>
       <TouchableOpacity onPress={props.sharePress}>
         <CustomIcon
           style={{
@@ -29,9 +30,10 @@ const BottomBtns = props => {
         />
       </TouchableOpacity>
       <TouchableOpacity onPress={props.chatPress}>
+        <Text style={{color: '#fff'}}>{props.videoIndex}</Text>
         <CustomIcon
           style={{
-            marginHorizontal: wp('5'),
+            marginHorizontal: wp('1'),
             marginVertical: hp('1'),
           }}
           name={'chatbubble-ellipses'}

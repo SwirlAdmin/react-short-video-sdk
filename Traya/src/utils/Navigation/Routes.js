@@ -15,7 +15,7 @@ function AppStack() {
           headerShown: false,
         }}>
         <Stack.Screen name="Home" component={HomeScreen} />
-        {/* <Stack.Screen name="HairTest" component={HairTest} /> */}
+        <Stack.Screen name="HairTest" component={HairTest} />
       </Stack.Navigator>
     </>
   );
