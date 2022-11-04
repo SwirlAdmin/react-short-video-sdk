@@ -353,10 +353,12 @@ const HomeScreen = props => {
         </View>
         {shouldShow ? (
           <Box
-            alignItems="center"
+            alignItems={'center'}
             position={'absolute'}
             alignSelf={'center'}
+            justifyContent={'center'}
             left={12}
+            right={12}
             shadow="9">
             <Box
               shadow="9"
@@ -652,14 +654,14 @@ const HomeScreen = props => {
           />
         )}
       </Modal>
-      <Modal
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={askQueBox}
         onRequestClose={() => {
           //   Alert.alert("Modal has been closed.");
           setAskQueBox(!askQueBox);
-        }}></Modal>
+        }}></Modal> */}
     </ImageBackground>
   );
 };
