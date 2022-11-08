@@ -17,11 +17,17 @@ import {
   Pressable,
   Button,
   StatusBar,
+  TextInput,
+  SafeAreaView,
+  Alert,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import PhoneInput from 'react-native-phone-number-input';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+
 import CustomIcon from '../components/Icon';
 import Video from 'react-native-video';
 import {useTogglePasswordVisibility} from '../components/ShowHide';
@@ -35,10 +41,12 @@ import {
   Center,
   Heading,
   HStack,
+  Input,
   Stack,
   TextArea,
   useToast,
 } from 'native-base';
+import {RegisterObj} from '../Storage/AsyncStorage';
 // create a component
 const HomeScreen = props => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -46,13 +54,22 @@ const HomeScreen = props => {
   const [apiRes, setApiRes] = useState();
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [serverLength, setServerLength] = useState(0);
-  const [askQueBox, setAskQueBox] = useState(false);
+  // const [serverLength, setServerLength] = useState(0);
   const [userMsg, setUserMsg] = useState('');
   const [shouldShow, setShouldShow] = useState(false);
+  const [async, setAsync] = useState();
+  const [username, setUsername] = React.useState('');
+  const [cCode, setCcode] = React.useState('');
+  const [sendRequest, setSendRequest] = useState(false);
+  const [conversion, setConversion] = useState(true);
+  const [mob, setMob] = React.useState('');
+  const [value, setValue] = useState('');
+  const [formattedValue, setFormattedValue] = useState('');
+  console.log(value, 'valuefsfsfvalue');
+  const phoneInput = useRef(null);
   const [buffering, setBuffering] = useState(true);
   const [isAlertVisible, setIsAlertVisible] = React.useState(false);
-
+  console.log(username, cCode, mob, 'djsafjisfjis');
   const handleButtonClick = () => {
     setIsAlertVisible(true);
   };
@@ -70,7 +87,6 @@ const HomeScreen = props => {
     videoStatus,
     centerIcon,
   } = useTogglePasswordVisibility();
-  const [password, setPassword] = useState('');
   const videoRef = useRef();
   const toast = useToast();
 
@@ -81,6 +97,49 @@ const HomeScreen = props => {
     console.log('Error raised.....', e);
   };
   console.log(buffering, 'buffering......');
+  const RegisterUser = (name, code, mobile) => {
+    var myHeaders = new Headers();
+    myHeaders.append('Cookie', 'ci_session=4s2giao9jdhc6k0rjoqdedsh6alo3vvu');
+
+    var formdata = new FormData();
+    formdata.append('name', name);
+    formdata.append('code', code);
+    formdata.append('mobile', mobile);
+
+    var requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: formdata,
+      redirect: 'follow',
+    };
+
+    fetch(
+      'https://api.goswirl.live/index.php/Shopify/user_register',
+      requestOptions,
+    )
+      .then(response => response.json())
+      .then(async result => {
+        console.log(result, 'user registered');
+        setTimeout(() => {
+          RegisterObj.setUser(true);
+        }, 100);
+      });
+  };
+  useEffect(() => {
+    if (sendRequest) {
+      setShouldShow(false);
+      //send the request
+      RegisterUser(username, formattedValue.replace(value, ''), mob);
+      setSendRequest(false);
+    }
+  }, [sendRequest]);
+  let localStorageData = RegisterObj.getUser();
+
+  localStorageData.then(val => {
+    setAsync(val);
+    console.log(val, '@local_storage');
+  });
+
   const GetData = () => {
     setLoading(true);
 
@@ -113,7 +172,7 @@ const HomeScreen = props => {
             return val.server_url;
           }
         });
-        setServerLength(serverLinks.length);
+        // setServerLength(serverLinks.length);
         console.log(serverLinks.length, 'length of server links');
         setApiRes(result?.Response?.videos);
         setLoading(false);
@@ -351,7 +410,129 @@ const HomeScreen = props => {
             </TouchableOpacity>
           </View>
         </View>
-        {shouldShow ? (
+        {shouldShow && !async ? (
+          <Box
+            alignItems={'center'}
+            position={'absolute'}
+            alignSelf={'center'}
+            justifyContent={'center'}
+            left={12}
+            right={12}
+            shadow="9">
+            <Box
+              shadow="9"
+              rounded="lg"
+              width={wp('90')}
+              overflow="hidden"
+              borderColor="red.200"
+              borderWidth="1"
+              _dark={{
+                borderColor: 'coolGray.600',
+                backgroundColor: 'gray.700',
+              }}
+              _web={{
+                shadow: 9,
+                borderWidth: 0,
+              }}
+              _light={{
+                backgroundColor: 'gray.50',
+              }}>
+              <Box>
+                {/* <View style={{backgroundColor: 'red', width: '100%'}}>
+                 <Text>jsdnfkdf</Text>
+               </View> */}
+                <View
+                  style={{
+                    backgroundColor: '#b8d445',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    paddingVertical: hp('0.5'),
+                    alignItems: 'center',
+                    paddingHorizontal: hp('1'),
+                  }}>
+                  <Text
+                    style={{
+                      color: '#000',
+                      fontSize: 16,
+                      fontWeight: '500',
+                    }}>
+                    Who are you?
+                  </Text>
+
+                  <Chevrons
+                    IconName={'close'}
+                    size={20}
+                    color={'#000'}
+                    onPress={() => setShouldShow(false)}
+                  />
+                </View>
+              </Box>
+              <Stack p="4" space={3}>
+                <Stack>
+                  <TextInput
+                    onChangeText={setUsername}
+                    value={username}
+                    placeholder="Your Name"
+                    style={{
+                      marginVertical: hp('1'),
+                    }}
+                  />
+
+                  <PhoneInput
+                    ref={phoneInput}
+                    // placeholder="dbjsbfkj"
+                    defaultValue={value}
+                    defaultCode="IN"
+                    layout="first"
+                    onChangeText={text => {
+                      setValue(text);
+                    }}
+                    onChangeFormattedText={text => {
+                      setFormattedValue(text);
+                    }}
+                    containerStyle={{
+                      width: wp('80'),
+                      marginVertical: hp('1'),
+                      height: hp('8'),
+                    }}
+                    textInputProps={{
+                      maxLength: 10,
+                      marginBottom: -4,
+                      keyboardType: 'number-pad',
+                    }}
+                    withShadow
+                    autoFocus
+                  />
+                </Stack>
+
+                <HStack alignItems="center" justifyContent={'center'}>
+                  {/* <Button
+                   title="Send"
+                   color="#b8d445"
+                   accessibilityLabel="ask questions from traya"
+                 /> */}
+                  <TouchableOpacity
+                    disabled={
+                      username.length && value.length == '' ? true : false
+                    }
+                    style={{
+                      backgroundColor: '#b8d445',
+                      paddingVertical: hp('0.8'),
+                      paddingHorizontal: wp('10'),
+                      borderRadius: 22,
+                      width: wp('80'),
+                    }}
+                    onPress={() => setSendRequest(true)}>
+                    <Text style={{color: '#fff', alignSelf: 'center'}}>
+                      Register
+                    </Text>
+                  </TouchableOpacity>
+                </HStack>
+              </Stack>
+            </Box>
+          </Box>
+        ) : null}
+        {shouldShow && async ? (
           <Box
             alignItems={'center'}
             position={'absolute'}
@@ -459,7 +640,11 @@ const HomeScreen = props => {
           }}>
           <BottomBtns
             sharePress={onShare}
-            chatPress={() => setShouldShow(true)}
+            chatPress={() => {
+              setConversion(true);
+              setShouldShow(true);
+              setConversion(false);
+            }}
           />
         </View>
         <View
@@ -483,7 +668,8 @@ const HomeScreen = props => {
             right: wp('2'),
           }}>
           <ShortBtn
-            onPress={() => alert('clicked!')}
+            // onPress={() => RegisterObj.clearUser()}
+            onPress={() => Alert.alert('Navigation')}
             title={'Take The Hair Test'}
           />
         </View>
@@ -581,68 +767,69 @@ const HomeScreen = props => {
           setModalVisible(!modalVisible);
         }}>
         {loading ? (
-          <ScrollView
-            contentContainerStyle={{
-              flex: 1,
-              backgroundColor: '#000',
-            }}
-            // refreshControl={
-            //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            // }
-          >
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <Text
-                style={{
-                  fontSize: 22,
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  color: '#fff',
-                }}>
-                Your internet seems to be slow
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  marginVertical: hp('2'),
-                  textAlign: 'center',
-                  width: wp('80'),
-                  color: '#fff',
-                }}>
-                Check you internet connection and try again
-              </Text>
-              <TouchableOpacity
-                onPress={onRefresh}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  backgroundColor: '#b9d446',
-                  width: wp('80%'),
-                  justifyContent: 'center',
-                }}>
-                <CustomIcon
-                  name={'reload'}
-                  size={20}
-                  style={{paddingVertical: hp('1.5')}}
-                  color={'#fff'}
-                  // onPress={() => setAskQueBox(!modalVisible)}
-                />
-                <Text
-                  style={{
-                    fontWeight: '500',
-                    marginLeft: wp('2'),
-                    fontSize: 16,
-                    color: '#fff',
-                  }}>
-                  TRY AGAIN
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
+          // <ScrollView
+          //   contentContainerStyle={{
+          //     flex: 1,
+          //     backgroundColor: '#000',
+          //   }}
+          //   // refreshControl={
+          //   //   <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          //   // }
+          // >
+          //   <View
+          //     style={{
+          //       flex: 1,
+          //       justifyContent: 'center',
+          //       alignItems: 'center',
+          //     }}>
+          //     <Text
+          //       style={{
+          //         fontSize: 22,
+          //         textAlign: 'center',
+          //         fontWeight: 'bold',
+          //         color: '#fff',
+          //       }}>
+          //       Your internet seems to be slow
+          //     </Text>
+          //     <Text
+          //       style={{
+          //         fontSize: 16,
+          //         marginVertical: hp('2'),
+          //         textAlign: 'center',
+          //         width: wp('80'),
+          //         color: '#fff',
+          //       }}>
+          //       Check you internet connection and try again
+          //     </Text>
+          //     <TouchableOpacity
+          //       onPress={onRefresh}
+          //       style={{
+          //         flexDirection: 'row',
+          //         alignItems: 'center',
+          //         backgroundColor: '#b9d446',
+          //         width: wp('80%'),
+          //         justifyContent: 'center',
+          //       }}>
+          //       <CustomIcon
+          //         name={'reload'}
+          //         size={20}
+          //         style={{paddingVertical: hp('1.5')}}
+          //         color={'#fff'}
+          //         // onPress={() => setAskQueBox(!modalVisible)}
+          //       />
+          //       <Text
+          //         style={{
+          //           fontWeight: '500',
+          //           marginLeft: wp('2'),
+          //           fontSize: 16,
+          //           color: '#fff',
+          //         }}>
+          //         TRY AGAIN
+          //       </Text>
+          //     </TouchableOpacity>
+          //   </View>
+          // </ScrollView>
+          <ActivityIndicator style={{flex: 1}} size={'large'} />
         ) : (
           <SwiperFlatList
             ref={scrollRef}
