@@ -4,6 +4,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import HomeScreen from '../../screens/Home';
 import HairTest from '../../screens/HairTest';
+import ShortVideo from '../../screens/ShortVideo';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,6 +17,7 @@ function AppStack() {
         }}>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="HairTest" component={HairTest} />
+        <Stack.Screen name="SVideo" component={ShortVideo} />
       </Stack.Navigator>
     </>
   );

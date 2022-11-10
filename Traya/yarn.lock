@@ -6763,6 +6763,11 @@ react-native-phone-number-input@^2.1.0:
     google-libphonenumber "^3.2.10"
     react-native-country-picker-modal "^2.0.0"
 
+react-native-pip-android@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-pip-android/-/react-native-pip-android-1.0.1.tgz#541717fae99685ebe1b10a431a1ed0cd5142ee01"
+  integrity sha512-x6klZyInwovU9SCVUqlkSsAdvjt2IxHbqYy6+Axx0PVYvSK/WolWgvfIp0yFu8H3G2AQgcbDdCo3+AvSq7+YPg==
+
 react-native-responsive-screen@^1.4.2:
   version "1.4.2"
   resolved "https://registry.npmjs.org/react-native-responsive-screen/-/react-native-responsive-screen-1.4.2.tgz"
