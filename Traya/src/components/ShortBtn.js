@@ -9,8 +9,8 @@ import {
 // create a component
 const ShortBtn = props => {
   return (
-    <TouchableOpacity onPress={props.onPress} style={styles.btnStyle}>
-      <Text style={styles.textStyle}>{props.title}</Text>
+    <TouchableOpacity onPress={props.onPress} style={props.style}>
+      <Text style={props.textStyle}>{props.title}</Text>
     </TouchableOpacity>
   );
 };
@@ -23,17 +23,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#2c3e50',
   },
-  btnStyle: {
-    backgroundColor: '#bfd85b',
-    paddingHorizontal: widthPercentageToDP('8'),
-    paddingVertical: heightPercentageToDP('1.5'),
-    borderRadius: 22,
-  },
-  textStyle: {
-    color: '#000',
-    fontSize: 15,
-    fontWeight: '400',
-  },
+  // btnStyle: {
+  //   backgroundColor: '#bfd85b',
+  //   paddingHorizontal: widthPercentageToDP('8'),
+  //   paddingVertical: heightPercentageToDP('1.5'),
+  //   borderRadius: 22,
+  // },
 });
 
 //make this component available to the app

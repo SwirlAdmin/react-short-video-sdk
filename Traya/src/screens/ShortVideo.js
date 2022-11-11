@@ -12,6 +12,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   TextInput,
+  Linking,
+  StatusBar,
 } from 'react-native';
 import PhoneInput from 'react-native-phone-number-input';
 // import {usePipModeListener} from 'react-native-pip-android';
@@ -26,6 +28,8 @@ import {RegisterObj} from '../Storage/AsyncStorage';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
+  widthPercentageToDP,
+  heightPercentageToDP,
 } from 'react-native-responsive-screen';
 // create a component
 const ShortVideo = ({route, navigation}) => {
@@ -37,7 +41,7 @@ const ShortVideo = ({route, navigation}) => {
   const [userMsg, setUserMsg] = useState('');
   const [shouldShow, setShouldShow] = useState(false);
   const [regShow, setRegShow] = useState(false);
-  const [getView, setGetView] = React.useState(false);
+  const [wholeData, setWholeData] = React.useState('');
 
   const [async, setAsync] = useState();
   const [username, setUsername] = React.useState('');
@@ -104,6 +108,7 @@ const ShortVideo = ({route, navigation}) => {
       .then(response => response.json())
       .then(result => {
         console.log(result?.Response?.videos, 'fsfnjsfn');
+        setWholeData(result?.Response);
         setApiRes(result?.Response?.videos);
         setLoading(false);
         setRefreshing(false);
@@ -138,7 +143,10 @@ const ShortVideo = ({route, navigation}) => {
       GetData();
     }, 2000);
   };
-
+  console.log(
+    wholeData?.customizationData?.bk_color_buy_btn,
+    'resudslt?.Responseresult?.Response',
+  );
   useEffect(() => {
     GetData();
   }, []);
@@ -219,7 +227,7 @@ const ShortVideo = ({route, navigation}) => {
       scrollEnabled={shouldShow ? false : true}
       data={apiRes}
       renderItem={({item, index}) => {
-        console.log(item, index, 'opodsdfpo');
+        console.log(item?.shopify_url, 'osdsfdfsdfpodsdfpo');
         currIndex == index ? PostView(item.video_id) : null;
         console.log(index, 'sddcdsfddsaddsdasfasdfuyshfushf');
         const onShare = async () => {
@@ -256,7 +264,6 @@ const ShortVideo = ({route, navigation}) => {
           <>
             <View
               style={{
-                paddingVertical: hp('0.2'),
                 backgroundColor: '#000',
                 height: windowHeight,
               }}>
@@ -299,6 +306,14 @@ const ShortVideo = ({route, navigation}) => {
                   marginHorizontal: hp('1'),
                   marginTop: hp('1'),
                 }}>
+                <Chevrons
+                  IconName={'ellipsis-vertical'}
+                  size={20}
+                  color={
+                    wholeData?.customizationData?.front_color_add_to_cart_btn
+                  }
+                  onPress={() => setShouldShow(false)}
+                />
                 <Text
                   style={{
                     color: '#fff',
@@ -373,8 +388,6 @@ const ShortVideo = ({route, navigation}) => {
                   maxW="80"
                   rounded="lg"
                   overflow="hidden"
-                  borderColor="coolGray.200"
-                  borderWidth="1"
                   _dark={{
                     borderColor: 'coolGray.600',
                     backgroundColor: 'gray.700',
@@ -392,7 +405,8 @@ const ShortVideo = ({route, navigation}) => {
                      </View> */}
                     <View
                       style={{
-                        backgroundColor: '#b8d445',
+                        backgroundColor:
+                          wholeData?.customizationData?.bk_color_buy_btn,
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                         paddingVertical: hp('0.5'),
@@ -401,7 +415,9 @@ const ShortVideo = ({route, navigation}) => {
                       }}>
                       <Text
                         style={{
-                          color: '#000',
+                          color:
+                            wholeData?.customizationData
+                              ?.front_color_add_to_cart_btn,
                           fontSize: 16,
                           fontWeight: '500',
                         }}>
@@ -411,7 +427,10 @@ const ShortVideo = ({route, navigation}) => {
                       <Chevrons
                         IconName={'close'}
                         size={20}
-                        color={'#000'}
+                        color={
+                          wholeData?.customizationData
+                            ?.front_color_add_to_cart_btn
+                        }
                         onPress={() => setShouldShow(false)}
                       />
                     </View>
@@ -439,7 +458,9 @@ const ShortVideo = ({route, navigation}) => {
                         disabled={userMsg.length == '' ? true : false}
                         style={{
                           backgroundColor:
-                            userMsg.length == '' ? '#d3d3d3' : '#b8d445',
+                            userMsg.length == ''
+                              ? '#d3d3d3'
+                              : wholeData?.customizationData?.bk_color_buy_btn,
                           paddingVertical: hp('0.8'),
                           paddingHorizontal: wp('10'),
                           borderRadius: 22,
@@ -485,7 +506,11 @@ const ShortVideo = ({route, navigation}) => {
                       >
                         <Text
                           style={{
-                            color: userMsg.length == '' ? '#fff' : '#000',
+                            color:
+                              userMsg.length == ''
+                                ? '#fff'
+                                : wholeData?.customizationData
+                                    ?.front_color_add_to_cart_btn,
                           }}>
                           Send
                         </Text>
@@ -510,14 +535,12 @@ const ShortVideo = ({route, navigation}) => {
                   width={wp('90')}
                   overflow="hidden"
                   //   borderColor="red.200"
-                  borderWidth="1"
                   _dark={{
                     borderColor: 'coolGray.600',
                     backgroundColor: 'gray.700',
                   }}
                   _web={{
                     shadow: 9,
-                    borderWidth: 0,
                   }}
                   _light={{
                     backgroundColor: 'gray.50',
@@ -528,7 +551,8 @@ const ShortVideo = ({route, navigation}) => {
                      </View> */}
                     <View
                       style={{
-                        backgroundColor: '#b8d445',
+                        backgroundColor:
+                          wholeData?.customizationData?.bk_color_buy_btn,
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                         paddingVertical: hp('0.5'),
@@ -537,7 +561,9 @@ const ShortVideo = ({route, navigation}) => {
                       }}>
                       <Text
                         style={{
-                          color: '#000',
+                          color:
+                            wholeData?.customizationData
+                              ?.front_color_add_to_cart_btn,
                           fontSize: 16,
                           fontWeight: '500',
                         }}>
@@ -547,7 +573,10 @@ const ShortVideo = ({route, navigation}) => {
                       <Chevrons
                         IconName={'close'}
                         size={20}
-                        color={'#000'}
+                        color={
+                          wholeData?.customizationData
+                            ?.front_color_add_to_cart_btn
+                        }
                         onPress={() => setRegShow(false)}
                       />
                     </View>
@@ -608,7 +637,7 @@ const ShortVideo = ({route, navigation}) => {
                           backgroundColor:
                             username.length == '' || value.length == 0
                               ? '#d3d3d3'
-                              : '#b8d445',
+                              : wholeData?.customizationData?.bk_color_buy_btn,
                           paddingVertical: hp('0.8'),
                           paddingHorizontal: wp('10'),
                           borderRadius: 22,
@@ -621,7 +650,13 @@ const ShortVideo = ({route, navigation}) => {
                             value,
                           );
                         }}>
-                        <Text style={{color: '#fff', alignSelf: 'center'}}>
+                        <Text
+                          style={{
+                            color:
+                              wholeData?.customizationData
+                                ?.front_color_add_to_cart_btn,
+                            alignSelf: 'center',
+                          }}>
                           Register
                         </Text>
                       </TouchableOpacity>
@@ -657,18 +692,34 @@ const ShortVideo = ({route, navigation}) => {
                 style={buffering ? {opacity: 1} : {opacity: 0}}
               />
             </View>
-            <View
-              style={{
-                position: 'absolute',
-                bottom: hp('1'),
-                right: wp('2'),
-              }}>
-              <ShortBtn
-                // onPress={() => RegisterObj.clearUser()}
-                onPress={() => alert('link your navigation')}
-                title={'Take The Hair Test'}
-              />
-            </View>
+
+            {item?.shopify_url == '' ? null : (
+              <View
+                style={{
+                  position: 'absolute',
+                  bottom: hp('1'),
+                  right: wp('2'),
+                }}>
+                <ShortBtn
+                  style={{
+                    backgroundColor:
+                      wholeData?.customizationData?.bk_color_buy_btn,
+                    paddingHorizontal: widthPercentageToDP('8'),
+                    paddingVertical: heightPercentageToDP('1.5'),
+                    borderRadius: 22,
+                  }}
+                  textStyle={{
+                    color:
+                      wholeData?.customizationData?.front_color_add_to_cart_btn,
+                    fontSize: 15,
+                    fontWeight: '400',
+                  }}
+                  // onPress={() => RegisterObj.clearUser()}
+                  onPress={() => Linking.openURL(item?.shopify_url)}
+                  title={'Take The Hair Test'}
+                />
+              </View>
+            )}
           </>
         );
       }}

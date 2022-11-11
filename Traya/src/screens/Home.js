@@ -62,10 +62,9 @@ const HomeScreen = props => {
       <StatusBar
         barStyle="dark-content"
         hidden={false}
-        backgroundColor="#b8d445"
+        backgroundColor={'#fff'}
         // translucent={true}
       />
-
       <FlatList
         style={{flex: 1}}
         data={rrr}
