@@ -18,7 +18,7 @@ const BottomBtns = props => {
   return (
     <SafeAreaView
       style={{flexDirection: 'column-reverse', marginHorizontal: wp('4')}}>
-      <TouchableOpacity onPress={props.sharePress}>
+      {/* <TouchableOpacity onPress={props.sharePress}>
         <CustomIcon
           style={{
             marginHorizontal: wp('1'),
@@ -28,7 +28,7 @@ const BottomBtns = props => {
           color={'#fff'}
           size={35}
         />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <TouchableOpacity onPress={props.chatPress}>
         <Text style={{color: '#fff'}}>{props.videoIndex}</Text>
         <CustomIcon

@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
   StatusBar,
+  View,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -23,9 +24,9 @@ const HomeScreen = props => {
     {
       id: 2,
       accessToken: 'abcdef',
-      playlistCode: 'dfXo0b',
+      playlistCode: '5sNm0y',
       baseImg:
-        'https://www.pixelstalk.net/wp-content/uploads/images1/Medical-Wallpapers-HD-768x480.jpg',
+        'https://images.hdqwalls.com/wallpapers/pubg-royale-2020-4k-1a.jpg',
     },
     {
       id: 3,
@@ -36,15 +37,34 @@ const HomeScreen = props => {
       id: 4,
       accessToken: 'abcdef',
       playlistCode: 'LyftMe',
-      baseImg:
-        'https://img.freepik.com/free-vector/hairdressing-salon-background-with-cartoon-woman_52683-73971.jpg?w=2000',
+      baseImg: 'https://wallpaperaccess.com/full/1251318.jpg',
     },
     {
       id: 5,
       accessToken: 'abcdef',
-      playlistCode: 'dfXo0b',
+      playlistCode: '5sNm0y',
+      baseImg: 'https://wallpaperaccess.com/full/2126183.jpg',
+    },
+    {
+      id: 6,
+      accessToken: 'abcdef',
+      playlistCode: 'LyftMe',
       baseImg:
-        'https://c4.wallpaperflare.com/wallpaper/737/93/233/computer-hi-tech-technology-wallpaper-preview.jpg',
+        'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+    },
+    {
+      id: 7,
+      accessToken: 'abcdef',
+      playlistCode: '5sNm0y',
+      baseImg:
+        'https://www.pixelstalk.net/wp-content/uploads/2016/05/Gaming-Backgrounds-Pictures-HD.png',
+    },
+    {
+      id: 8,
+      accessToken: 'abcdef',
+      playlistCode: 'LyftMe',
+      baseImg:
+        'https://cdn.now.gg/apps-content/com.ludo.king/banner/desktop/ludo-king%E2%84%A2.jpg',
     },
   ];
 
@@ -54,11 +74,7 @@ const HomeScreen = props => {
   console.log(rrr, 'fsfddsfsfsd3df');
 
   return (
-    <ImageBackground
-      source={{
-        uri: 'https://www.nicepng.com/png/full/447-4478234_starburst-background-png-clipart-royalty-free-stock-starburst.png',
-      }}
-      style={{flex: 1}}>
+    <View style={{flex: 1}}>
       <StatusBar
         barStyle="dark-content"
         hidden={false}
@@ -97,15 +113,15 @@ const HomeScreen = props => {
           );
         }}
       />
-    </ImageBackground>
+    </View>
   );
 };
 
 // define your styles
 const styles = StyleSheet.create({
   tinyLogo: {
-    width: wp('60'),
-    height: hp('30'),
+    width: wp('90'),
+    height: hp('15'),
     borderRadius: 22,
   },
 });

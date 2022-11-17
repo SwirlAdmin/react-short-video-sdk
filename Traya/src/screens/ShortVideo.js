@@ -1,6 +1,8 @@
 //import liraries
 import {Box, HStack, Stack, TextArea} from 'native-base';
 import React, {useEffect, useRef, useState} from 'react';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+
 import {
   View,
   Text,
@@ -14,9 +16,14 @@ import {
   TextInput,
   Linking,
   StatusBar,
+  Pressable,
+  TouchableWithoutFeedback,
+  Alert,
+  Image,
+  BackHandler,
 } from 'react-native';
+import Modal from 'react-native-modal';
 import PhoneInput from 'react-native-phone-number-input';
-// import {usePipModeListener} from 'react-native-pip-android';
 import SwiperFlatList from 'react-native-swiper-flatlist';
 import Video from 'react-native-video';
 import BottomBtns from '../components/BottomBtns';
@@ -36,24 +43,57 @@ const ShortVideo = ({route, navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [currIndex, setIndex] = useState();
   const [apiRes, setApiRes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const [skelton, setSkelton] = useState(true);
   const [userMsg, setUserMsg] = useState('');
   const [shouldShow, setShouldShow] = useState(false);
   const [regShow, setRegShow] = useState(false);
   const [wholeData, setWholeData] = React.useState('');
+  const [progress, setProgress] = useState(1);
 
   const [async, setAsync] = useState();
   const [username, setUsername] = React.useState('');
-  //   const [sendRequest, setSendRequest] = useState(false);
+  const [sendRequest, setSendRequest] = useState(false);
   const [value, setValue] = useState('');
   const [formattedValue, setFormattedValue] = useState('');
   const phoneInput = useRef(null);
   const [buffering, setBuffering] = useState(true);
-  const [filtereData, setFiltereData] = useState('');
+  const [spChr, setSpChr] = useState(false);
   const windowHeight = Dimensions.get('window').height;
+  function handleBackButtonClick() {
+    navigation.goBack();
+    setSkelton(false);
+    return true;
+  }
+  var regex = /\d+/g || '!@#$%^&*()+=-[]\\\';,./{}|":<>?';
+  var string = username;
+  var isNumeric = string.match(regex);
+  console.log(isNumeric, 'dsfdsdsffsdf');
+  const isSpeChr = function containsSpecialChars(str) {
+    const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+    return specialChars.test(str);
+  };
+  // console.log(a);
+  console.log(isSpeChr(username), '222dsd22222');
+  const handleProgress = progress => {
+    setProgress(progress.atValue);
+  };
+  console.log(progress, 'fsdfdfsdfdsfdsf');
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener(
+        'hardwareBackPress',
+        handleBackButtonClick,
+      );
+    };
+  }, []);
+  console.log(skelton, 'skelton');
+  setTimeout(() => {
+    sendRequest && setSendRequest(false);
+    sendRequest && setShouldShow(false);
+  }, 2000);
   const {data} = route.params;
-
+  console.log(wholeData);
   console.log(
     username,
     formattedValue.replace(value, ''),
@@ -74,21 +114,59 @@ const ShortVideo = ({route, navigation}) => {
   } = useTogglePasswordVisibility();
   const videoRef = useRef();
   // const inPipMode = usePipModeListener();
+  console.log(videoRef.current, 'viddsoRdf.current');
+  // useEffect(() => {
+  //   if (!!videoRef.current) {
+  //     videoRef.current.seek(0);
+  //   }
+  // }, [currIndex]);
   const onBuffer = ({isBuffering}) => {
+    console.log(isBuffering, 'fdsfjhdsfusfsdf');
     setBuffering(isBuffering);
+    // isBuffering ? GetData() : null;
   };
+  // console.log(isBuffering, 'isBufferingisBufferingisBuffering');
   const onError = e => {
     console.log('Error raised.....', e);
   };
   console.log(buffering, 'buffering......');
   const scrollRef = useRef();
+  // const GetData = () => {
+  //   setLoading(true);
+  //   var myHeaders = new Headers();
+  //   myHeaders.append(
+  //     'Cookie',
+  //     'ci_session=pkaf9r6n9uhvp6pf1339v4h0qutrp6jl; ci_session=f8sfka5a9v8ee7ljshhtr1falka1vr6g',
+  //   );
+
+  //   var formdata = new FormData();
+  //   formdata.append('playlistCode', data?.playlistCode);
+  //   formdata.append('accessToken', data?.accessToken);
+
+  //   var requestOptions = {
+  //     method: 'POST',
+  //     headers: myHeaders,
+  //     body: formdata,
+  //     redirect: 'follow',
+  //   };
+
+  //   fetch(
+  //     'https://api.goswirl.live/index.php/APIv1/shortVideos/getPlyalistVideos',
+  //     requestOptions,
+  //   )
+  //     .then(response => response.json())
+  //     .then(result => {
+  //       console.log(result?.Response, 'fsfnjsdffn');
+  //       setWholeData(result?.Response);
+  //       setApiRes(result?.Response?.videos);
+  //       setLoading(false);
+  //       setRefreshing(false);
+  //     })
+  //     .catch(error => console.log('error', error));
+  // };
   const GetData = () => {
-    setLoading(true);
     var myHeaders = new Headers();
-    myHeaders.append(
-      'Cookie',
-      'ci_session=pkaf9r6n9uhvp6pf1339v4h0qutrp6jl; ci_session=f8sfka5a9v8ee7ljshhtr1falka1vr6g',
-    );
+    myHeaders.append('Cookie', 'ci_session=pkaf9r6n9uhvp6pf1339v4h0qutrp6jl');
 
     var formdata = new FormData();
     formdata.append('playlistCode', data?.playlistCode);
@@ -102,20 +180,18 @@ const ShortVideo = ({route, navigation}) => {
     };
 
     fetch(
-      'https://livevideoshopping.in/admin/APIv1/shortVideos/getPlyalistVideos',
+      'https://api.goswirl.live/index.php/APIv1/shortVideos/getPlyalistVideos',
       requestOptions,
     )
       .then(response => response.json())
       .then(result => {
-        console.log(result?.Response?.videos, 'fsfnjsfn');
+        console.log(result?.Response?.videos, 'fsdfsdf');
+        setSkelton(false);
         setWholeData(result?.Response);
         setApiRes(result?.Response?.videos);
-        setLoading(false);
-        setRefreshing(false);
       })
       .catch(error => console.log('error', error));
   };
-
   const AskQuestion = (_uid, _did, _sid, _msg) => {
     var myHeaders = new Headers();
     myHeaders.append('Cookie', 'ci_session=okq9kvlc524s3ho346fjr08075g4q692');
@@ -135,17 +211,20 @@ const ShortVideo = ({route, navigation}) => {
 
     fetch('https://api.goswirl.live/index.php/Shopify/askque', requestOptions)
       .then(response => response.json())
-      .then(result => console.log(result, '_mdadsaddssg'))
+      .then(result => {
+        console.log(result, '_mdadsaddssg');
+        setSendRequest(true);
+      })
       .catch(error => console.log('error', error));
   };
-  const onRefresh = () => {
-    setTimeout(() => {
-      GetData();
-    }, 2000);
-  };
+  // const onRefresh = () => {
+  //   setTimeout(() => {
+  //     GetData();
+  //   }, 2000);
+  // };
   console.log(
     wholeData?.customizationData?.bk_color_buy_btn,
-    'resudslt?.Responseresult?.Response',
+    'resdsudslt?.Responseresult?.Response',
   );
   useEffect(() => {
     GetData();
@@ -174,10 +253,11 @@ const ShortVideo = ({route, navigation}) => {
       .then(response => response.json())
       .then(async result => {
         console.log(result, 'user registered');
+        setSendRequest(true);
         setTimeout(() => {
           RegisterObj.setUser(true);
           setRegShow(false);
-        }, 100);
+        }, 1000);
       });
   };
 
@@ -219,512 +299,766 @@ const ShortVideo = ({route, navigation}) => {
   const onChangeIndex = ({index}) => {
     setIndex(index);
   };
-  console.log(currIndex, 'hdsjkadhiasdh');
+  console.log(skelton, 'skelton');
+  // setInterval(!skelton ? GetData : null, 5000);
+  // {
+  //   skelton == true
+  //     ? setInterval(function () {
+  //         GetData();
+  //       }, 8000)
+  //     : null;
+  // }
   return (
-    <SwiperFlatList
-      ref={scrollRef}
-      horizontal
-      scrollEnabled={shouldShow ? false : true}
-      data={apiRes}
-      renderItem={({item, index}) => {
-        console.log(item?.shopify_url, 'osdsfdfsdfpodsdfpo');
-        currIndex == index ? PostView(item.video_id) : null;
-        console.log(index, 'sddcdsfddsaddsdasfasdfuyshfushf');
-        const onShare = async () => {
-          try {
-            const result = await Share.share({
-              message: item?.server_url,
-            });
-            if (result.action === Share.sharedAction) {
-              if (result.activityType) {
-              } else {
-              }
-            } else if (result.action === Share.dismissedAction) {
-            }
-          } catch (error) {
-            alert(error.message);
-          }
-        };
-        //SHARE FUNCTIONALITY
-        ////////////////////////////////////////////////////////////////////
-
-        ////////////////////////////////////////////////////////////////////
-
-        //INSIDE CARDS FUNCTIONALITY
-        ////////////////////////////////////////////////////////////////////
-
-        return loading == true ? (
-          <ScrollView
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }>
-            <ActivityIndicator />
-          </ScrollView>
-        ) : (
-          <>
-            <View
-              style={{
-                backgroundColor: '#000',
-                height: windowHeight,
-              }}>
-              <Video
-                // playInBackground={true}
-                // hideShutterView={true}
-                // fullscreen={true}
-                // // minLoadRetryCount={2}
-                // // pictureInPicture={true}
-                muted={soundVis}
-                source={{
-                  uri: item?.server_url,
+    <>
+      <>
+        <Modal
+          animationIn={'slideOutLeft'}
+          animationOut={'slideInLeft'}
+          transparent={true}
+          // supportedOrientations={'left'}
+          visible={modalVisible}
+          onRequestClose={() => {
+            Alert.alert('Modal has been closed.');
+            setModalVisible(!modalVisible);
+          }}>
+          <View
+            style={{
+              height: hp('100%'),
+              backgroundColor: '#000000d9',
+              width: wp('75'),
+              opacity: 0.8,
+              position: 'absolute',
+              left: -20,
+            }}>
+            <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
+              <CustomIcon
+                style={{
+                  marginHorizontal: wp('1'),
+                  marginVertical: hp('2'),
+                  alignSelf: 'flex-end',
                 }}
-                // onSeek={data => console.log('onSeek', data)}
-                poster={item?.cover_image}
-                posterResizeMode={'cover'}
-                // playInBackground={true}
-                ref={videoRef}
-                resizeMode="cover"
-                onBuffer={onBuffer}
-                onError={onError}
-                repeat
-                playWhenInactive={true}
-                playInBackground={true}
-                paused={currIndex !== index || shouldShow ? true : false}
-                style={{width: wp('100'), height: windowHeight}}
+                name={'close-circle'}
+                color={'#fff'}
+                size={35}
               />
-            </View>
-            <View
-              style={{
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                left: 0,
-                justifyContent: 'space-between',
-              }}>
+            </TouchableOpacity>
+            <View style={{flex: 1}}>
               <View
                 style={{
-                  flexDirection: 'row',
-                  marginHorizontal: hp('1'),
-                  marginTop: hp('1'),
+                  alignItems: 'center',
                 }}>
-                <Chevrons
-                  IconName={'ellipsis-vertical'}
-                  size={20}
-                  color={
-                    wholeData?.customizationData?.front_color_add_to_cart_btn
-                  }
-                  onPress={() => setShouldShow(false)}
+                <Image
+                  source={{uri: wholeData?.customizationData?.user_profile}}
+                  style={{
+                    width: wp('30'),
+                    height: wp('30'),
+                    resizeMode: 'cover',
+                    borderRadius: 15,
+                  }}
                 />
+                <View
+                  style={{
+                    marginVertical: hp('2.5'),
+                    marginHorizontal: wp('4'),
+                  }}>
+                  <Text
+                    style={{
+                      color: '#fff',
+                      fontSize: 20,
+                      paddingBottom: wp('3'),
+                      alignSelf: 'center',
+                      fontWeight: 'bold',
+                    }}>
+                    {wholeData?.customizationData?.designer_brand_name}
+                  </Text>
+
+                  {wholeData?.customizationData?.designer_bio == '' ? null : (
+                    <>
+                      <View
+                        style={{
+                          borderTopWidth: 1.5,
+                          borderColor: '#fff',
+                          width: wp('55'),
+                          alignSelf: 'center',
+                        }}
+                      />
+                      <Text
+                        style={{
+                          color: '#fff',
+                          fontSize: 18,
+                          paddingTop: wp('3'),
+                          alignSelf: 'center',
+                        }}>
+                        ABOUT
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#fff',
+                          fontSize: 14,
+                          paddingTop: wp('3'),
+                          alignSelf: 'center',
+                          textAlign: 'center',
+                          letterSpacing: 1.2,
+                        }}>
+                        {wholeData?.customizationData?.designer_bio}
+                      </Text>
+                    </>
+                  )}
+                </View>
+              </View>
+              <View
+                style={{
+                  alignItems: 'center',
+                  marginHorizontal: wp('4'),
+                  marginTop: hp('30'),
+                }}>
                 <Text
                   style={{
                     color: '#fff',
                     fontSize: 18,
-                    justifyContent: 'center',
+                    paddingTop: wp('3'),
                     alignSelf: 'center',
-                    width: wp('60'),
+                    textAlign: 'center',
+                    letterSpacing: 1.2,
+                    fontWeight: 'bold',
+                    marginVertical: hp('2'),
                   }}>
-                  {item?.video_title}
+                  Powered by
                 </Text>
+                <View style={{backgroundColor: '#fff', borderRadius: 12}}>
+                  <Image
+                    source={{uri: wholeData?.customizationData?.brand_logo}}
+                    style={{
+                      width: wp('30'),
+                      height: wp('8'),
+                      resizeMode: 'contain',
+                    }}
+                  />
+                </View>
               </View>
             </View>
-            <View
-              style={{
-                position: 'absolute',
-                top: 0,
-                bottom: 0,
-                right: 0,
-                justifyContent: 'space-between',
-              }}>
-              <View style={{flexDirection: 'row'}}>
-                <TouchableOpacity
-                  onPress={() => alert('In Progress')}
-                  style={{alignItems: 'center', justifyContent: 'center'}}>
-                  <CustomIcon
-                    style={{
-                      marginHorizontal: wp('3'),
-                      marginVertical: hp('1'),
-                    }}
-                    name={'scan-outline'}
-                    color={'#fff'}
-                    size={25}
-                  />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={handlePasswordVisibility}>
-                  <CustomIcon
-                    style={{
-                      marginHorizontal: wp('1'),
-                      marginVertical: hp('1'),
-                    }}
-                    name={rightIcon}
-                    color={'#fff'}
-                    size={35}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                  <CustomIcon
-                    style={{
-                      marginHorizontal: wp('1'),
-                      marginVertical: hp('1'),
-                    }}
-                    name={'close-outline'}
-                    color={'#fff'}
-                    size={35}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {shouldShow ? (
-              <Box
-                alignItems={'center'}
-                position={'absolute'}
-                alignSelf={'center'}
-                justifyContent={'center'}
-                left={12}
-                right={12}
-                shadow="9">
-                <Box
-                  shadow="9"
-                  maxW="80"
-                  rounded="lg"
-                  overflow="hidden"
-                  _dark={{
-                    borderColor: 'coolGray.600',
-                    backgroundColor: 'gray.700',
-                  }}
-                  _web={{
-                    shadow: 9,
-                    borderWidth: 0,
-                  }}
-                  _light={{
-                    backgroundColor: 'gray.50',
-                  }}>
-                  <Box>
-                    {/* <View style={{backgroundColor: 'red', width: '100%'}}>
-                       <Text>jsdnfkdf</Text>
-                     </View> */}
-                    <View
-                      style={{
-                        backgroundColor:
-                          wholeData?.customizationData?.bk_color_buy_btn,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        paddingVertical: hp('0.5'),
-                        alignItems: 'center',
-                        paddingHorizontal: hp('1'),
-                      }}>
-                      <Text
-                        style={{
-                          color:
-                            wholeData?.customizationData
-                              ?.front_color_add_to_cart_btn,
-                          fontSize: 16,
-                          fontWeight: '500',
-                        }}>
-                        Ask Question
-                      </Text>
-
-                      <Chevrons
-                        IconName={'close'}
-                        size={20}
-                        color={
-                          wholeData?.customizationData
-                            ?.front_color_add_to_cart_btn
-                        }
-                        onPress={() => setShouldShow(false)}
-                      />
-                    </View>
-                  </Box>
-                  <Stack p="4" space={3}>
-                    <Stack space={12}>
-                      <TextArea
-                        value={userMsg}
-                        onChange={e => setUserMsg(e.currentTarget.value)} // for web
-                        onChangeText={text => setUserMsg(text)}
-                        h={20}
-                        placeholder="Type Here"
-                        w={400}
-                        maxW="100%"
-                      />
-                    </Stack>
-
-                    <HStack alignItems="center" justifyContent={'center'}>
-                      {/* <Button
-                         title="Send"
-                         color="#b8d445"
-                         accessibilityLabel="ask questions from traya"
-                       /> */}
-                      <TouchableOpacity
-                        disabled={userMsg.length == '' ? true : false}
-                        style={{
-                          backgroundColor:
-                            userMsg.length == ''
-                              ? '#d3d3d3'
-                              : wholeData?.customizationData?.bk_color_buy_btn,
-                          paddingVertical: hp('0.8'),
-                          paddingHorizontal: wp('10'),
-                          borderRadius: 22,
-                        }}
-                        //                     onPress={() => {
-                        // setShouldShow(false);
-                        // RegisterUser(username, formattedValue.replace(value, ''), value);
-                        //   AskQuestion(
-                        //     18580,
-                        //     1234,
-                        //     3412,
-                        //     userMsg,
-                        //     item.designer_id,
-                        //   ),
-                        //     setShouldShow(false);
-                        //   setUserMsg('');
-                        //   setRegShow(true);
-                        //                     }}
-                        onPress={() => {
-                          if (!async) {
-                            setRegShow(true);
-                          } else {
-                            AskQuestion(
-                              18580,
-                              1234,
-                              3412,
-                              userMsg,
-                              item.designer_id,
-                            ),
-                              setShouldShow(false);
-                            setUserMsg('');
-                            setRegShow(true);
-                          }
-                        }}
-                        // onPress={
-                        //   !async
-                        //     ? this.makeRemoteRequest.bind(this)
-                        //     : () =>
-                        //         Alert.alert(
-                        //           'Please fill the service detail first',
-                        //         )
-                        // }
-                      >
-                        <Text
-                          style={{
-                            color:
-                              userMsg.length == ''
-                                ? '#fff'
-                                : wholeData?.customizationData
-                                    ?.front_color_add_to_cart_btn,
-                          }}>
-                          Send
-                        </Text>
-                      </TouchableOpacity>
-                    </HStack>
-                  </Stack>
-                </Box>
-              </Box>
-            ) : null}
-            {!async && regShow ? (
-              <Box
-                alignItems={'center'}
-                position={'absolute'}
-                alignSelf={'center'}
-                justifyContent={'center'}
-                left={12}
-                right={12}
-                shadow="9">
-                <Box
-                  shadow="9"
-                  rounded="lg"
-                  width={wp('90')}
-                  overflow="hidden"
-                  //   borderColor="red.200"
-                  _dark={{
-                    borderColor: 'coolGray.600',
-                    backgroundColor: 'gray.700',
-                  }}
-                  _web={{
-                    shadow: 9,
-                  }}
-                  _light={{
-                    backgroundColor: 'gray.50',
-                  }}>
-                  <Box>
-                    {/* <View style={{backgroundColor: 'red', width: '100%'}}>
-                       <Text>jsdnfkdf</Text>
-                     </View> */}
-                    <View
-                      style={{
-                        backgroundColor:
-                          wholeData?.customizationData?.bk_color_buy_btn,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        paddingVertical: hp('0.5'),
-                        alignItems: 'center',
-                        paddingHorizontal: hp('1'),
-                      }}>
-                      <Text
-                        style={{
-                          color:
-                            wholeData?.customizationData
-                              ?.front_color_add_to_cart_btn,
-                          fontSize: 16,
-                          fontWeight: '500',
-                        }}>
-                        Who are you?
-                      </Text>
-
-                      <Chevrons
-                        IconName={'close'}
-                        size={20}
-                        color={
-                          wholeData?.customizationData
-                            ?.front_color_add_to_cart_btn
-                        }
-                        onPress={() => setRegShow(false)}
-                      />
-                    </View>
-                  </Box>
-                  <Stack p="4" space={3}>
-                    <Stack>
-                      <TextInput
-                        onChangeText={setUsername}
-                        value={username}
-                        placeholder="Your Name"
-                        style={{
-                          marginVertical: hp('1'),
-                          fontSize: 16,
-                          fontWeight: '500',
-                        }}
-                      />
-
-                      <PhoneInput
-                        ref={phoneInput}
-                        // placeholder="dbjsbfkj"
-                        defaultValue={value}
-                        defaultCode="IN"
-                        layout="first"
-                        onChangeText={text => {
-                          setValue(text);
-                        }}
-                        onChangeFormattedText={text => {
-                          setFormattedValue(text);
-                        }}
-                        containerStyle={{
-                          width: wp('80'),
-                          // marginVertical: hp('1'),
-                          // height: hp('8'),
-                        }}
-                        textInputProps={{
-                          maxLength: 10,
-                          // marginBottom: -4,
-                          keyboardType: 'number-pad',
-                        }}
-                        withShadow
-                        autoFocus
-                      />
-                    </Stack>
-
-                    <HStack alignItems="center" justifyContent={'center'}>
-                      {/* <Button
-                         title="Send"
-                         color="#b8d445"
-                         accessibilityLabel="ask questions from traya"
-                       /> */}
-                      <TouchableOpacity
-                        disabled={
-                          username.length == '' || value.length == 0
-                            ? true
-                            : false
-                        }
-                        style={{
-                          backgroundColor:
-                            username.length == '' || value.length == 0
-                              ? '#d3d3d3'
-                              : wholeData?.customizationData?.bk_color_buy_btn,
-                          paddingVertical: hp('0.8'),
-                          paddingHorizontal: wp('10'),
-                          borderRadius: 22,
-                          width: wp('80'),
-                        }}
-                        onPress={() => {
-                          RegisterUser(
-                            username,
-                            formattedValue.replace(value, ''),
-                            value,
-                          );
-                        }}>
-                        <Text
-                          style={{
-                            color:
-                              wholeData?.customizationData
-                                ?.front_color_add_to_cart_btn,
-                            alignSelf: 'center',
-                          }}>
-                          Register
-                        </Text>
-                      </TouchableOpacity>
-                    </HStack>
-                  </Stack>
-                </Box>
-              </Box>
-            ) : null}
-            <View
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-              }}>
-              <BottomBtns
-                sharePress={onShare}
-                chatPress={() => {
-                  setShouldShow(true);
-                }}
-              />
-            </View>
-            <View
-              style={{
-                position: 'absolute',
-                left: 0,
-                alignSelf: 'center',
-                right: 12,
-              }}>
-              <ActivityIndicator
-                animating
-                size="large"
-                color={'#bfd85b'}
-                style={buffering ? {opacity: 1} : {opacity: 0}}
-              />
-            </View>
-
-            {item?.shopify_url == '' ? null : (
+          </View>
+        </Modal>
+      </>
+      {skelton ? (
+        <SkeletonPlaceholder backgroundColor="#e1e3e6" borderRadius={4}>
+          <View
+            style={{
+              justifyContent: 'center',
+              marginVertical: hp('2'),
+            }}>
+            <View style={{marginHorizontal: wp('5')}}>
               <View
                 style={{
-                  position: 'absolute',
-                  bottom: hp('1'),
-                  right: wp('2'),
+                  justifyContent: 'space-between',
+                  flexDirection: 'row',
                 }}>
-                <ShortBtn
-                  style={{
-                    backgroundColor:
-                      wholeData?.customizationData?.bk_color_buy_btn,
-                    paddingHorizontal: widthPercentageToDP('8'),
-                    paddingVertical: heightPercentageToDP('1.5'),
-                    borderRadius: 22,
-                  }}
-                  textStyle={{
-                    color:
-                      wholeData?.customizationData?.front_color_add_to_cart_btn,
-                    fontSize: 15,
-                    fontWeight: '400',
-                  }}
-                  // onPress={() => RegisterObj.clearUser()}
-                  onPress={() => Linking.openURL(item?.shopify_url)}
-                  title={'Take The Hair Test'}
+                <View
+                  style={{width: wp('60'), height: hp('5'), borderRadius: 15}}
+                />
+                <View
+                  style={{width: wp('25'), height: hp('5'), borderRadius: 15}}
                 />
               </View>
-            )}
-          </>
-        );
-      }}
-      onChangeIndex={onChangeIndex}
-    />
+            </View>
+            <View
+              style={{
+                alignItems: 'center',
+                marginVertical: hp('1'),
+              }}>
+              <View
+                style={{width: wp('90'), height: hp('80'), borderRadius: 15}}
+              />
+            </View>
+            <View
+              style={{
+                marginHorizontal: wp('5'),
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}>
+              <View
+                style={{width: wp('20'), height: hp('5'), borderRadius: 15}}
+              />
+              <View
+                style={{width: wp('20'), height: hp('5'), borderRadius: 15}}
+              />
+              <View
+                style={{width: wp('20'), height: hp('5'), borderRadius: 15}}
+              />
+              <View
+                style={{width: wp('20'), height: hp('5'), borderRadius: 15}}
+              />
+            </View>
+          </View>
+        </SkeletonPlaceholder>
+      ) : (
+        <SwiperFlatList
+          ref={scrollRef}
+          horizontal
+          scrollEnabled={shouldShow ? false : true}
+          data={apiRes}
+          renderItem={({item, index}) => {
+            console.log(item?.shopify_url, 'osdsfdfsdfpodsdfpo');
+            currIndex == index ? PostView(item.video_id) : null;
+            console.log(index, 'sddcdsfddsaddsdasfasdfuyshfushf');
+            // const onShare = async () => {
+            //   try {
+            //     const result = await Share.share({
+            //       message: item?.server_url,
+            //     });
+            //     if (result.action === Share.sharedAction) {
+            //       if (result.activityType) {
+            //       } else {
+            //       }
+            //     } else if (result.action === Share.dismissedAction) {
+            //     }
+            //   } catch (error) {
+            //     alert(error.message);
+            //   }
+            // };
+            //SHARE FUNCTIONALITY
+            ////////////////////////////////////////////////////////////////////
+
+            ////////////////////////////////////////////////////////////////////
+
+            //INSIDE CARDS FUNCTIONALITY
+            ////////////////////////////////////////////////////////////////////
+
+            return (
+              <>
+                <View
+                  style={{
+                    backgroundColor: '#000',
+                    height: windowHeight,
+                  }}>
+                  <Video
+                    // playInBackground={true}
+                    // hideShutterView={true}
+                    // fullscreen={true}
+                    // // minLoadRetryCount={2}
+                    // // pictureInPicture={true}
+                    // onSeek={'0'}
+                    onProgress={handleProgress}
+                    muted={soundVis}
+                    seekColor="#a146b7"
+                    source={{
+                      uri: item?.server_url,
+                    }}
+                    // onSeek={data => console.log('onSeek', data)}
+                    poster={item?.cover_image}
+                    posterResizeMode={'cover'}
+                    // playInBackground={true}
+                    ref={videoRef}
+                    resizeMode="cover"
+                    onBuffer={onBuffer}
+                    onError={onError}
+                    repeat
+                    playWhenInactive={true}
+                    playInBackground={false}
+                    // paused={currIndex !== index || shouldShow ? true : false}
+                    paused={currIndex !== index ? true : false}
+                    style={{width: wp('100'), height: windowHeight}}
+                  />
+                </View>
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    justifyContent: 'space-between',
+                  }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      marginHorizontal: hp('1'),
+                      marginTop: hp('1'),
+                    }}>
+                    <Chevrons
+                      IconName={'ellipsis-vertical'}
+                      size={20}
+                      color={'#fff'}
+                      onPress={() => setModalVisible(true)}
+                    />
+                    <Text
+                      style={{
+                        color: '#fff',
+                        fontSize: 18,
+                        justifyContent: 'center',
+                        alignSelf: 'center',
+                        width: wp('50'),
+                      }}>
+                      {item?.video_title}
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    right: 0,
+                    justifyContent: 'space-between',
+                  }}>
+                  <View style={{flexDirection: 'row'}}>
+                    <TouchableOpacity
+                      onPress={() => alert('In Progress')}
+                      style={{alignItems: 'center', justifyContent: 'center'}}>
+                      <CustomIcon
+                        style={{
+                          marginHorizontal: wp('3'),
+                          marginVertical: hp('1'),
+                        }}
+                        name={'scan-outline'}
+                        color={'#fff'}
+                        size={25}
+                      />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={handlePasswordVisibility}>
+                      <CustomIcon
+                        style={{
+                          marginHorizontal: wp('1'),
+                          marginVertical: hp('1'),
+                        }}
+                        name={rightIcon}
+                        color={'#fff'}
+                        size={35}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSkelton(false);
+                        navigation.goBack();
+                      }}>
+                      <CustomIcon
+                        style={{
+                          marginHorizontal: wp('1'),
+                          marginVertical: hp('1'),
+                        }}
+                        name={'close-outline'}
+                        color={'#fff'}
+                        size={35}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                {shouldShow ? (
+                  <Box
+                    alignItems={'center'}
+                    position={'absolute'}
+                    alignSelf={'center'}
+                    justifyContent={'center'}
+                    left={12}
+                    right={12}
+                    shadow="9">
+                    <Box
+                      shadow="9"
+                      maxW="80"
+                      rounded="lg"
+                      overflow="hidden"
+                      _dark={{
+                        borderColor: 'coolGray.600',
+                        backgroundColor: 'gray.700',
+                      }}
+                      _web={{
+                        shadow: 9,
+                        borderWidth: 0,
+                      }}
+                      _light={{
+                        backgroundColor: 'gray.50',
+                      }}>
+                      <Box>
+                        {/* <View style={{backgroundColor: 'red', width: '100%'}}>
+                   <Text>jsdnfkdf</Text>
+                 </View> */}
+                        <View
+                          style={{
+                            backgroundColor:
+                              wholeData?.customizationData?.bk_color_buy_btn,
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            paddingVertical: hp('0.5'),
+                            alignItems: 'center',
+                            paddingHorizontal: hp('1'),
+                          }}>
+                          <Text
+                            style={{
+                              color:
+                                wholeData?.customizationData
+                                  ?.front_color_buy_btn,
+                              fontSize: 16,
+                              fontWeight: '500',
+                            }}>
+                            Ask Question
+                          </Text>
+
+                          <Chevrons
+                            IconName={'close'}
+                            size={20}
+                            color={
+                              wholeData?.customizationData?.front_color_buy_btn
+                            }
+                            onPress={() => setShouldShow(false)}
+                          />
+                        </View>
+                      </Box>
+                      <Stack p="4" space={3}>
+                        <Stack space={12}>
+                          <TextArea
+                            borderColor={'warmGray.300'}
+                            value={userMsg}
+                            onChange={e => setUserMsg(e.currentTarget.value)} // for web
+                            onChangeText={text => setUserMsg(text)}
+                            h={20}
+                            placeholder="Type Here"
+                            w={400}
+                            maxW="100%"
+                          />
+                        </Stack>
+
+                        <HStack alignItems="center" justifyContent={'center'}>
+                          {/* <Button
+                     title="Send"
+                     color="#b8d445"
+                     accessibilityLabel="ask questions from traya"
+                   /> */}
+                          {sendRequest ? (
+                            <Text style={{color: 'green'}}>
+                              Your query is submitted. Thank you!
+                            </Text>
+                          ) : (
+                            <TouchableOpacity
+                              disabled={userMsg.length == '' ? true : false}
+                              style={{
+                                backgroundColor:
+                                  userMsg.length == ''
+                                    ? '#d3d3d3'
+                                    : wholeData?.customizationData
+                                        ?.bk_color_buy_btn,
+                                paddingVertical: hp('0.8'),
+                                paddingHorizontal: wp('10'),
+                                borderRadius: 22,
+                              }}
+                              //                     onPress={() => {
+                              // setShouldShow(false);
+                              // RegisterUser(username, formattedValue.replace(value, ''), value);
+                              //   AskQuestion(
+                              //     18580,
+                              //     1234,
+                              //     3412,
+                              //     userMsg,
+                              //     item.designer_id,
+                              //   ),
+                              //     setShouldShow(false);
+                              //   setUserMsg('');
+                              //   setRegShow(true);
+                              //                     }}
+                              onPress={() => {
+                                if (!async) {
+                                  setRegShow(true);
+                                } else {
+                                  AskQuestion(
+                                    18580,
+                                    1234,
+                                    3412,
+                                    userMsg,
+                                    item.designer_id,
+                                  ),
+                                    setUserMsg('');
+                                  setRegShow(true);
+                                }
+                              }}
+                              // onPress={
+                              //   !async
+                              //     ? this.makeRemoteRequest.bind(this)
+                              //     : () =>
+                              //         Alert.alert(
+                              //           'Please fill the service detail first',
+                              //         )
+                              // }
+                            >
+                              <Text
+                                style={{
+                                  color:
+                                    userMsg.length == ''
+                                      ? '#fff'
+                                      : wholeData?.customizationData
+                                          ?.front_color_buy_btn,
+                                }}>
+                                Send
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </HStack>
+                      </Stack>
+                    </Box>
+                  </Box>
+                ) : null}
+                {!async && regShow ? (
+                  <Box
+                    alignItems={'center'}
+                    position={'absolute'}
+                    alignSelf={'center'}
+                    justifyContent={'center'}
+                    left={12}
+                    right={12}
+                    shadow="9">
+                    <Box
+                      shadow="9"
+                      rounded="lg"
+                      width={wp('90')}
+                      overflow="hidden"
+                      //   borderColor="red.200"
+                      _dark={{
+                        borderColor: 'coolGray.600',
+                        backgroundColor: 'gray.700',
+                      }}
+                      _web={{
+                        shadow: 9,
+                      }}
+                      _light={{
+                        backgroundColor: 'gray.50',
+                      }}>
+                      <Box>
+                        {/* <View style={{backgroundColor: 'red', width: '100%'}}>
+                   <Text>jsdnfkdf</Text>
+                 </View> */}
+                        <View
+                          style={{
+                            backgroundColor:
+                              wholeData?.customizationData?.bk_color_buy_btn,
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            paddingVertical: hp('0.5'),
+                            alignItems: 'center',
+                            paddingHorizontal: hp('1'),
+                          }}>
+                          <Text
+                            style={{
+                              color:
+                                wholeData?.customizationData
+                                  ?.front_color_buy_btn,
+                              fontSize: 16,
+                              fontWeight: '500',
+                            }}>
+                            Register Yourself
+                          </Text>
+
+                          <Chevrons
+                            IconName={'close'}
+                            size={20}
+                            color={
+                              wholeData?.customizationData?.front_color_buy_btn
+                            }
+                            onPress={() => setRegShow(false)}
+                          />
+                        </View>
+                      </Box>
+                      <Stack p="4" space={3}>
+                        <Stack>
+                          <TextInput
+                            onChangeText={setUsername}
+                            value={username}
+                            placeholder="Your Name"
+                            style={{
+                              marginVertical: hp('1'),
+                              fontSize: 16,
+                              fontWeight: '500',
+                              borderWidth:
+                                isNumeric !== null || isSpeChr(username)
+                                  ? 1
+                                  : 0,
+                              borderColor: 'red',
+                              borderRadius: 8,
+                            }}
+                          />
+                          {isNumeric !== null || isSpeChr(username) ? (
+                            <Text style={{color: 'red', marginBottom: hp('4')}}>
+                              Enter only characters
+                            </Text>
+                          ) : null}
+                          <PhoneInput
+                            ref={phoneInput}
+                            // placeholder="dbjsbfkj"
+                            defaultValue={value}
+                            defaultCode="IN"
+                            layout="first"
+                            onChangeText={text => {
+                              setValue(text);
+                            }}
+                            onChangeFormattedText={text => {
+                              setFormattedValue(text);
+                            }}
+                            containerStyle={{
+                              width: wp('80'),
+                              // marginVertical: hp('1'),
+                              // height: hp('8'),
+                            }}
+                            textInputProps={{
+                              maxLength: 10,
+                              // marginBottom: -4,
+                              keyboardType: 'number-pad',
+                            }}
+                            withShadow
+                            autoFocus
+                          />
+                        </Stack>
+
+                        <HStack alignItems="center" justifyContent={'center'}>
+                          {/* <Button
+                     title="Send"
+                     color="#b8d445"
+                     accessibilityLabel="ask questions from traya"
+                   /> */}
+                          {sendRequest ? (
+                            <Text style={{color: 'green'}}>
+                              Your query is submitted. Thank you!
+                            </Text>
+                          ) : (
+                            <TouchableOpacity
+                              disabled={
+                                username.length == '' ||
+                                value.length == 0 ||
+                                isNumeric !== null ||
+                                isSpeChr(username)
+                                  ? true
+                                  : false
+                              }
+                              style={{
+                                backgroundColor:
+                                  username.length == '' ||
+                                  value.length == 0 ||
+                                  isNumeric !== null ||
+                                  isSpeChr(username)
+                                    ? '#d3d3d3'
+                                    : wholeData?.customizationData
+                                        ?.bk_color_buy_btn,
+                                paddingVertical: hp('1'),
+                                paddingHorizontal: wp('10'),
+                                borderRadius: 22,
+                                width: wp('80'),
+                                marginVertical: hp('1'),
+                              }}
+                              onPress={() => {
+                                RegisterUser(
+                                  username,
+                                  formattedValue.replace(value, ''),
+                                  value,
+                                );
+                                AskQuestion(
+                                  18580,
+                                  1234,
+                                  3412,
+                                  userMsg,
+                                  item.designer_id,
+                                ),
+                                  setUserMsg('');
+                                setShouldShow(false);
+                              }}>
+                              <Text
+                                style={{
+                                  color:
+                                    username.length == '' ||
+                                    value.length == 0 ||
+                                    isNumeric !== null ||
+                                    isSpeChr(username)
+                                      ? '#fff'
+                                      : wholeData?.customizationData
+                                          ?.front_color_buy_btn,
+                                  alignSelf: 'center',
+                                  fontSize: 16,
+                                }}>
+                                Register
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </HStack>
+                      </Stack>
+                    </Box>
+                  </Box>
+                ) : null}
+                <View
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                  }}>
+                  <BottomBtns
+                    // sharePress={onShare}
+                    chatPress={() => {
+                      setShouldShow(true);
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    alignSelf: 'center',
+                    right: 12,
+                  }}>
+                  <ActivityIndicator
+                    animating
+                    size="large"
+                    color={wholeData?.customizationData?.bk_color_buy_btn}
+                    style={
+                      currIndex == index && buffering
+                        ? {opacity: 1}
+                        : {opacity: 0}
+                    }
+                  />
+                </View>
+                {item?.shopify_url == '' ? null : (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      bottom: hp('1'),
+                      right: wp('2'),
+                    }}>
+                    <ShortBtn
+                      style={{
+                        backgroundColor: 'red',
+                        paddingHorizontal: widthPercentageToDP('8'),
+                        paddingVertical: heightPercentageToDP('1.5'),
+                        borderRadius: 22,
+                      }}
+                      textStyle={{
+                        color: '#fff',
+                        fontSize: 15,
+                        fontWeight: '400',
+                      }}
+                      // onPress={() => RegisterObj.clearUser()}
+                      onPress={() => RegisterObj.clearUser()}
+                      title={'clear storage'}
+                    />
+                    <ShortBtn
+                      style={{
+                        backgroundColor:
+                          wholeData?.customizationData?.bk_color_buy_btn,
+                        paddingHorizontal: widthPercentageToDP('8'),
+                        paddingVertical: heightPercentageToDP('1.5'),
+                        borderRadius: 22,
+                      }}
+                      textStyle={{
+                        color:
+                          wholeData?.customizationData?.front_color_buy_btn,
+                        fontSize: 15,
+                        fontWeight: '400',
+                      }}
+                      // onPress={() => RegisterObj.clearUser()}
+                      onPress={() => Linking.openURL(item?.shopify_url)}
+                      title={'Take The Hair Test'}
+                    />
+                  </View>
+                )}
+              </>
+            );
+          }}
+          onChangeIndex={onChangeIndex}
+        />
+      )}
+    </>
   );
 };
 
@@ -735,6 +1069,47 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#2c3e50',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: '#F194FF',
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
 
