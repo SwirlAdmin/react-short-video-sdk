@@ -500,7 +500,9 @@ const ShortVideo = ({route, navigation}) => {
           renderItem={({item, index}) => {
             console.log(item?.shopify_url, 'osdsfdfsdfpodsdfpo');
             currIndex == index ? PostView(item.video_id) : null;
-            console.log(index, 'sddcdsfddsaddsdasfasdfuyshfushf');
+            console.log(index, currIndex, 'sddcdsfddsaddsdasfasdfuyshfushf');
+            // console.log(currIndex !== index, 'pause or not');
+
             // const onShare = async () => {
             //   try {
             //     const result = await Share.share({
@@ -523,7 +525,7 @@ const ShortVideo = ({route, navigation}) => {
 
             //INSIDE CARDS FUNCTIONALITY
             ////////////////////////////////////////////////////////////////////
-
+            // console.log(index == 0 && currIndex == undefined, 'what is ppp');
             return (
               <>
                 <View
@@ -556,7 +558,13 @@ const ShortVideo = ({route, navigation}) => {
                     playWhenInactive={true}
                     playInBackground={false}
                     // paused={currIndex !== index || shouldShow ? true : false}
-                    paused={currIndex !== index ? true : false}
+                    // paused={currIndex !== index ? true : false}
+                    paused={
+                      (index == 0 && currIndex == undefined) ||
+                      currIndex == index
+                        ? false
+                        : true
+                    }
                     style={{width: wp('100'), height: windowHeight}}
                   />
                 </View>
@@ -860,6 +868,7 @@ const ShortVideo = ({route, navigation}) => {
                           <TextInput
                             onChangeText={setUsername}
                             value={username}
+                            autoFocus
                             placeholder="Your Name"
                             style={{
                               marginVertical: hp('1'),
@@ -901,7 +910,6 @@ const ShortVideo = ({route, navigation}) => {
                               keyboardType: 'number-pad',
                             }}
                             withShadow
-                            autoFocus
                           />
                         </Stack>
 
@@ -1016,7 +1024,7 @@ const ShortVideo = ({route, navigation}) => {
                       bottom: hp('1'),
                       right: wp('2'),
                     }}>
-                    <ShortBtn
+                    {/* <ShortBtn
                       style={{
                         backgroundColor: 'red',
                         paddingHorizontal: widthPercentageToDP('8'),
@@ -1031,7 +1039,7 @@ const ShortVideo = ({route, navigation}) => {
                       // onPress={() => RegisterObj.clearUser()}
                       onPress={() => RegisterObj.clearUser()}
                       title={'clear storage'}
-                    />
+                    /> */}
                     <ShortBtn
                       style={{
                         backgroundColor:
