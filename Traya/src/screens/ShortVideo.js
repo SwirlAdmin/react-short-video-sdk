@@ -15,9 +15,6 @@ import {
   TouchableOpacity,
   TextInput,
   Linking,
-  StatusBar,
-  Pressable,
-  TouchableWithoutFeedback,
   Alert,
   Image,
   BackHandler,
@@ -31,13 +28,14 @@ import Chevrons from '../components/Chevrons';
 import CustomIcon from '../components/Icon';
 import ShortBtn from '../components/ShortBtn';
 import {useTogglePasswordVisibility} from '../components/ShowHide';
-import {RegisterObj} from '../Storage/AsyncStorage';
+import {RegisterObj, userIdStorage} from '../Storage/AsyncStorage';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
   widthPercentageToDP,
   heightPercentageToDP,
 } from 'react-native-responsive-screen';
+
 // create a component
 const ShortVideo = ({route, navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -57,27 +55,26 @@ const ShortVideo = ({route, navigation}) => {
   const [formattedValue, setFormattedValue] = useState('');
   const phoneInput = useRef(null);
   const [buffering, setBuffering] = useState(true);
-  const [spChr, setSpChr] = useState(false);
+  // const [userId, setUserId] = useState('');
+  const [id, setId] = useState('');
   const windowHeight = Dimensions.get('window').height;
+  console.log(id, '@useriddddd');
   function handleBackButtonClick() {
     navigation.goBack();
     setSkelton(false);
     return true;
   }
+  console.log(userMsg, 'ewrewr');
   var regex = /\d+/g || '!@#$%^&*()+=-[]\\\';,./{}|":<>?';
   var string = username;
   var isNumeric = string.match(regex);
-  console.log(isNumeric, 'dsfdsdsffsdf');
   const isSpeChr = function containsSpecialChars(str) {
     const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
     return specialChars.test(str);
   };
-  // console.log(a);
-  console.log(isSpeChr(username), '222dsd22222');
   const handleProgress = progress => {
     setProgress(progress.atValue);
   };
-  console.log(progress, 'fsdfdfsdfdsfdsf');
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
     return () => {
@@ -87,21 +84,12 @@ const ShortVideo = ({route, navigation}) => {
       );
     };
   }, []);
-  console.log(skelton, 'skelton');
   setTimeout(() => {
     sendRequest && setSendRequest(false);
     sendRequest && setShouldShow(false);
   }, 2000);
   const {data} = route.params;
-  console.log(wholeData);
-  console.log(
-    username,
-    formattedValue.replace(value, ''),
-    value,
-    userMsg,
 
-    'erueiworuewrieddsdfsdffsfiorie',
-  );
   // CUSTOM HOOKS
 
   const {
@@ -113,57 +101,19 @@ const ShortVideo = ({route, navigation}) => {
     centerIcon,
   } = useTogglePasswordVisibility();
   const videoRef = useRef();
-  // const inPipMode = usePipModeListener();
-  console.log(videoRef.current, 'viddsoRdf.current');
   // useEffect(() => {
   //   if (!!videoRef.current) {
   //     videoRef.current.seek(0);
   //   }
   // }, [currIndex]);
   const onBuffer = ({isBuffering}) => {
-    console.log(isBuffering, 'fdsfjhdsfusfsdf');
     setBuffering(isBuffering);
-    // isBuffering ? GetData() : null;
   };
-  // console.log(isBuffering, 'isBufferingisBufferingisBuffering');
   const onError = e => {
     console.log('Error raised.....', e);
   };
-  console.log(buffering, 'buffering......');
   const scrollRef = useRef();
-  // const GetData = () => {
-  //   setLoading(true);
-  //   var myHeaders = new Headers();
-  //   myHeaders.append(
-  //     'Cookie',
-  //     'ci_session=pkaf9r6n9uhvp6pf1339v4h0qutrp6jl; ci_session=f8sfka5a9v8ee7ljshhtr1falka1vr6g',
-  //   );
 
-  //   var formdata = new FormData();
-  //   formdata.append('playlistCode', data?.playlistCode);
-  //   formdata.append('accessToken', data?.accessToken);
-
-  //   var requestOptions = {
-  //     method: 'POST',
-  //     headers: myHeaders,
-  //     body: formdata,
-  //     redirect: 'follow',
-  //   };
-
-  //   fetch(
-  //     'https://api.goswirl.live/index.php/APIv1/shortVideos/getPlyalistVideos',
-  //     requestOptions,
-  //   )
-  //     .then(response => response.json())
-  //     .then(result => {
-  //       console.log(result?.Response, 'fsfnjsdffn');
-  //       setWholeData(result?.Response);
-  //       setApiRes(result?.Response?.videos);
-  //       setLoading(false);
-  //       setRefreshing(false);
-  //     })
-  //     .catch(error => console.log('error', error));
-  // };
   const GetData = () => {
     var myHeaders = new Headers();
     myHeaders.append('Cookie', 'ci_session=pkaf9r6n9uhvp6pf1339v4h0qutrp6jl');
@@ -185,7 +135,6 @@ const ShortVideo = ({route, navigation}) => {
     )
       .then(response => response.json())
       .then(result => {
-        console.log(result?.Response?.videos, 'fsdfsdf');
         setSkelton(false);
         setWholeData(result?.Response);
         setApiRes(result?.Response?.videos);
@@ -212,20 +161,11 @@ const ShortVideo = ({route, navigation}) => {
     fetch('https://api.goswirl.live/index.php/Shopify/askque', requestOptions)
       .then(response => response.json())
       .then(result => {
-        console.log(result, '_mdadsaddssg');
         setSendRequest(true);
       })
       .catch(error => console.log('error', error));
   };
-  // const onRefresh = () => {
-  //   setTimeout(() => {
-  //     GetData();
-  //   }, 2000);
-  // };
-  console.log(
-    wholeData?.customizationData?.bk_color_buy_btn,
-    'resdsudslt?.Responseresult?.Response',
-  );
+
   useEffect(() => {
     GetData();
   }, []);
@@ -252,7 +192,11 @@ const ShortVideo = ({route, navigation}) => {
     )
       .then(response => response.json())
       .then(async result => {
-        console.log(result, 'user registered');
+        console.log(result?.data?.user_id, 'user registered');
+        userIdStorage.setUser(result?.data?.user_id);
+        setTimeout(() => {
+          setRegShow(false);
+        }, 1000);
         setSendRequest(true);
         setTimeout(() => {
           RegisterObj.setUser(true);
@@ -280,7 +224,7 @@ const ShortVideo = ({route, navigation}) => {
       requestOptions,
     )
       .then(response => response.json())
-      .then(result => console.log(result, 'asdjwjewjeieijwijei'))
+      .then(result => console.log(result, 'postView'))
       .catch(error => console.log('error', error));
   };
   //   useEffect(() => {
@@ -296,18 +240,17 @@ const ShortVideo = ({route, navigation}) => {
     setAsync(val);
     console.log(val, '@local_storage');
   });
+
+  let userIdReg = userIdStorage.getUser();
+
+  userIdReg.then(e => {
+    setId(e == true ? e : '');
+    console.log(e, '@udid');
+  });
   const onChangeIndex = ({index}) => {
     setIndex(index);
   };
-  console.log(skelton, 'skelton');
-  // setInterval(!skelton ? GetData : null, 5000);
-  // {
-  //   skelton == true
-  //     ? setInterval(function () {
-  //         GetData();
-  //       }, 8000)
-  //     : null;
-  // }
+
   return (
     <>
       <>
@@ -498,10 +441,14 @@ const ShortVideo = ({route, navigation}) => {
           scrollEnabled={shouldShow ? false : true}
           data={apiRes}
           renderItem={({item, index}) => {
-            console.log(item?.shopify_url, 'osdsfdfsdfpodsdfpo');
             currIndex == index ? PostView(item.video_id) : null;
-            console.log(index, currIndex, 'sddcdsfddsaddsdasfasdfuyshfushf');
-            // console.log(currIndex !== index, 'pause or not');
+            console.log(
+              id,
+              item?.designer_id,
+              userMsg,
+              item.video_id,
+              'details',
+            );
 
             // const onShare = async () => {
             //   try {
@@ -556,7 +503,7 @@ const ShortVideo = ({route, navigation}) => {
                     onError={onError}
                     repeat
                     playWhenInactive={true}
-                    playInBackground={false}
+                    // playInBackground={true}
                     // paused={currIndex !== index || shouldShow ? true : false}
                     // paused={currIndex !== index ? true : false}
                     paused={
@@ -610,7 +557,7 @@ const ShortVideo = ({route, navigation}) => {
                   }}>
                   <View style={{flexDirection: 'row'}}>
                     <TouchableOpacity
-                      onPress={() => alert('In Progress')}
+                      // onPress={() => ReactNativeCustomModule.onStateChanged()}
                       style={{alignItems: 'center', justifyContent: 'center'}}>
                       <CustomIcon
                         style={{
@@ -748,33 +695,17 @@ const ShortVideo = ({route, navigation}) => {
                                 paddingHorizontal: wp('10'),
                                 borderRadius: 22,
                               }}
-                              //                     onPress={() => {
-                              // setShouldShow(false);
-                              // RegisterUser(username, formattedValue.replace(value, ''), value);
-                              //   AskQuestion(
-                              //     18580,
-                              //     1234,
-                              //     3412,
-                              //     userMsg,
-                              //     item.designer_id,
-                              //   ),
-                              //     setShouldShow(false);
-                              //   setUserMsg('');
-                              //   setRegShow(true);
-                              //                     }}
                               onPress={() => {
                                 if (!async) {
                                   setRegShow(true);
                                 } else {
                                   AskQuestion(
-                                    18580,
-                                    1234,
-                                    3412,
-                                    userMsg,
+                                    id,
                                     item.designer_id,
+                                    userMsg,
+                                    item?.video_id,
                                   ),
-                                    setUserMsg('');
-                                  setRegShow(true);
+                                    setRegShow(true);
                                 }
                               }}
                               // onPress={
@@ -955,14 +886,12 @@ const ShortVideo = ({route, navigation}) => {
                                   value,
                                 );
                                 AskQuestion(
-                                  18580,
-                                  1234,
-                                  3412,
+                                  id,
+                                  item?.designer_id,
                                   userMsg,
-                                  item.designer_id,
+                                  item.video_id,
                                 ),
-                                  setUserMsg('');
-                                setShouldShow(false);
+                                  setShouldShow(false);
                               }}>
                               <Text
                                 style={{
@@ -1024,7 +953,7 @@ const ShortVideo = ({route, navigation}) => {
                       bottom: hp('1'),
                       right: wp('2'),
                     }}>
-                    {/* <ShortBtn
+                    <ShortBtn
                       style={{
                         backgroundColor: 'red',
                         paddingHorizontal: widthPercentageToDP('8'),
@@ -1039,7 +968,7 @@ const ShortVideo = ({route, navigation}) => {
                       // onPress={() => RegisterObj.clearUser()}
                       onPress={() => RegisterObj.clearUser()}
                       title={'clear storage'}
-                    /> */}
+                    />
                     <ShortBtn
                       style={{
                         backgroundColor:

@@ -71,7 +71,7 @@ const HomeScreen = props => {
   const rrr = dummydata.filter(e => {
     return e.accessToken;
   });
-  console.log(rrr, 'fsfddsfsfsd3df');
+  console.log(rrr, 'converted dummy data');
 
   return (
     <View style={{flex: 1}}>

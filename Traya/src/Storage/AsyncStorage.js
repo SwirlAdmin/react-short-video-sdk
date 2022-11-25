@@ -17,3 +17,21 @@ export class RegisterObj {
     return AsyncStorage.removeItem(RegisterObj.USER);
   }
 }
+export class userIdStorage {
+  static USER = 'user';
+
+  static setUser(data) {
+    return AsyncStorage.setItem(userIdStorage.USER, JSON.stringify(data));
+  }
+  static async getUser() {
+    try {
+      const response = await AsyncStorage.getItem(userIdStorage.USER);
+      return JSON.parse(response);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+  }
+  static clearUser() {
+    return AsyncStorage.removeItem(userIdStorage.USER);
+  }
+}
