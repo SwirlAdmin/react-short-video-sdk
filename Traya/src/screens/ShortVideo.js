@@ -2,7 +2,7 @@
 import {Box, HStack, Stack, TextArea} from 'native-base';
 import React, {useEffect, useRef, useState} from 'react';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -161,7 +161,9 @@ const ShortVideo = ({route, navigation}) => {
     fetch('https://api.goswirl.live/index.php/Shopify/askque', requestOptions)
       .then(response => response.json())
       .then(result => {
+        console.log(result?.success, 'dsfsfcsdfsdfsdf');
         setSendRequest(true);
+        result?.success && setUserMsg('');
       })
       .catch(error => console.log('error', error));
   };
@@ -193,11 +195,10 @@ const ShortVideo = ({route, navigation}) => {
       .then(response => response.json())
       .then(async result => {
         console.log(result?.data?.user_id, 'user registered');
-        userIdStorage.setUser(result?.data?.user_id);
+        AsyncStorage.setItem('@storage_Key', result?.data?.user_id);
         setTimeout(() => {
           setRegShow(false);
         }, 1000);
-        setSendRequest(true);
         setTimeout(() => {
           RegisterObj.setUser(true);
           setRegShow(false);
@@ -241,11 +242,16 @@ const ShortVideo = ({route, navigation}) => {
     console.log(val, '@local_storage');
   });
 
-  let userIdReg = userIdStorage.getUser();
+  // let userIdReg = userIdStorage.getUser();
 
-  userIdReg.then(e => {
-    setId(e == true ? e : '');
-    console.log(e, '@udid');
+  // userIdReg.then(e => {
+  //   // setId(e == true ? e : '');
+  //   console.log(e, '@abc');
+  // });
+  const myData = AsyncStorage.getItem('@storage_Key');
+  console.log(myData, '@storage_Key');
+  myData.then(e => {
+    setId(e);
   });
   const onChangeIndex = ({index}) => {
     setIndex(index);
@@ -542,7 +548,8 @@ const ShortVideo = ({route, navigation}) => {
                         justifyContent: 'center',
                         alignSelf: 'center',
                         width: wp('50'),
-                      }}>
+                      }}
+                      numberOfLines={1}>
                       {item?.video_title}
                     </Text>
                   </View>
@@ -556,7 +563,7 @@ const ShortVideo = ({route, navigation}) => {
                     justifyContent: 'space-between',
                   }}>
                   <View style={{flexDirection: 'row'}}>
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                       // onPress={() => ReactNativeCustomModule.onStateChanged()}
                       style={{alignItems: 'center', justifyContent: 'center'}}>
                       <CustomIcon
@@ -568,7 +575,7 @@ const ShortVideo = ({route, navigation}) => {
                         color={'#fff'}
                         size={25}
                       />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                     <TouchableOpacity onPress={handlePasswordVisibility}>
                       <CustomIcon
@@ -669,6 +676,7 @@ const ShortVideo = ({route, navigation}) => {
                             placeholder="Type Here"
                             w={400}
                             maxW="100%"
+                            autoFocus
                           />
                         </Stack>
 
@@ -953,7 +961,7 @@ const ShortVideo = ({route, navigation}) => {
                       bottom: hp('1'),
                       right: wp('2'),
                     }}>
-                    <ShortBtn
+                    {/* <ShortBtn
                       style={{
                         backgroundColor: 'red',
                         paddingHorizontal: widthPercentageToDP('8'),
@@ -966,9 +974,9 @@ const ShortVideo = ({route, navigation}) => {
                         fontWeight: '400',
                       }}
                       // onPress={() => RegisterObj.clearUser()}
-                      onPress={() => RegisterObj.clearUser()}
+                      onPress={() => AsyncStorage.clear()}
                       title={'clear storage'}
-                    />
+                    /> */}
                     <ShortBtn
                       style={{
                         backgroundColor:
