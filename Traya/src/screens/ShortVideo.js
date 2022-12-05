@@ -135,6 +135,8 @@ const ShortVideo = ({route, navigation}) => {
     )
       .then(response => response.json())
       .then(result => {
+        console.log(result, ' ---- Get Data API result...');
+
         setSkelton(false);
         setWholeData(result?.Response);
         setApiRes(result?.Response?.videos);
@@ -148,8 +150,8 @@ const ShortVideo = ({route, navigation}) => {
     var formdata = new FormData();
     formdata.append('user_id', _uid);
     formdata.append('designer_id', _did);
-    formdata.append('msg', _msg);
-    formdata.append('swirls_id', _sid);
+    formdata.append('msg', _sid);
+    formdata.append('swirls_id', _msg);
 
     var requestOptions = {
       method: 'POST',
@@ -161,7 +163,7 @@ const ShortVideo = ({route, navigation}) => {
     fetch('https://api.goswirl.live/index.php/Shopify/askque', requestOptions)
       .then(response => response.json())
       .then(result => {
-        console.log(result?.success, 'dsfsfcsdfsdfsdf');
+        console.log(result, 'dsfsfcsdfsdfsdf');
         setSendRequest(true);
         result?.success && setUserMsg('');
       })
@@ -448,6 +450,9 @@ const ShortVideo = ({route, navigation}) => {
           data={apiRes}
           renderItem={({item, index}) => {
             currIndex == index ? PostView(item.video_id) : null;
+
+            console.log(currIndex, index, 'currIndex or Index');
+
             console.log(
               id,
               item?.designer_id,
@@ -704,6 +709,8 @@ const ShortVideo = ({route, navigation}) => {
                                 borderRadius: 22,
                               }}
                               onPress={() => {
+                                console.log(item?.video_id, '5555');
+
                                 if (!async) {
                                   setRegShow(true);
                                 } else {
@@ -847,6 +854,9 @@ const ShortVideo = ({route, navigation}) => {
                               maxLength: 10,
                               // marginBottom: -4,
                               keyboardType: 'number-pad',
+                            }}
+                            textInputStyle={{
+                              color: '#000',
                             }}
                             withShadow
                           />
