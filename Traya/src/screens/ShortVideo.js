@@ -509,11 +509,12 @@ const ShortVideo = ({route, navigation}) => {
                     posterResizeMode={'cover'}
                     // playInBackground={true}
                     ref={videoRef}
-                    resizeMode="cover"
+                    resizeMode="contain"
                     onBuffer={onBuffer}
                     onError={onError}
                     repeat
                     playWhenInactive={true}
+                    
                     // playInBackground={true}
                     // paused={currIndex !== index || shouldShow ? true : false}
                     // paused={currIndex !== index ? true : false}
@@ -523,6 +524,7 @@ const ShortVideo = ({route, navigation}) => {
                         ? false
                         : true
                     }
+                  
                     style={{width: wp('100'), height: windowHeight}}
                   />
                 </View>
@@ -946,7 +948,7 @@ const ShortVideo = ({route, navigation}) => {
                     }}
                   />
                 </View>
-                <View
+                {/* <View
                   style={{
                     position: 'absolute',
                     left: 0,
@@ -963,7 +965,7 @@ const ShortVideo = ({route, navigation}) => {
                         : {opacity: 0}
                     }
                   />
-                </View>
+                </View> */}
                 {item?.shopify_url == '' ? null : (
                   <View
                     style={{
