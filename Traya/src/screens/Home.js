@@ -24,7 +24,7 @@ const HomeScreen = props => {
     {
       id: 2,
       accessToken: '34vu4367n8f8f38ghcpr',
-      playlistCode: 'YQrvmw',
+      playlistCode: 'BA0LeY',
       baseImg:
         'https://images.hdqwalls.com/wallpapers/pubg-royale-2020-4k-1a.jpg',
     },
@@ -41,28 +41,28 @@ const HomeScreen = props => {
     },
     {
       id: 5,
-      accessToken: 'demo12345',
-      playlistCode: 'WQxgF1',
+      accessToken: 'awdlsuezjficqginlsdr',
+      playlistCode: '46bVki',
       baseImg: 'https://wallpaperaccess.com/full/2126183.jpg',
     },
     {
       id: 6,
-      accessToken: 'demo12345',
-      playlistCode: 'WQxgF1',
+      accessToken: 'awdlsuezjficqginlsdr',
+      playlistCode: '46bVki',
       baseImg:
         'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
     },
     {
       id: 7,
-      accessToken: 'demo12345',
-      playlistCode: 'WQxgF1',
+      accessToken: 'awdlsuezjficqginlsdr',
+      playlistCode: 'dty2B7',
       baseImg:
         'https://www.pixelstalk.net/wp-content/uploads/2016/05/Gaming-Backgrounds-Pictures-HD.png',
     },
     {
       id: 8,
-      accessToken: 'demo12345',
-      playlistCode: 'WQxgF1',
+      accessToken: 'awdlsuezjficqginlsdr',
+      playlistCode: 'dty2B7',
       baseImg:
         'https://cdn.now.gg/apps-content/com.ludo.king/banner/desktop/ludo-king%E2%84%A2.jpg',
     },

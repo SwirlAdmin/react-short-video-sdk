@@ -47,6 +47,8 @@ const ShortVideo = ({route, navigation}) => {
   const [regShow, setRegShow] = useState(false);
   const [wholeData, setWholeData] = React.useState('');
   const [progress, setProgress] = useState(1);
+  const [serverLength, setServerLength] = useState(0);
+  const flatListRef = useRef({});
 
   const [async, setAsync] = useState();
   const [username, setUsername] = React.useState('');
@@ -64,6 +66,8 @@ const ShortVideo = ({route, navigation}) => {
     setSkelton(false);
     return true;
   }
+  console.log(currIndex, 'currIndexcurrIndex');
+
   console.log(userMsg, 'ewrewr');
   var regex = /\d+/g || '!@#$%^&*()+=-[]\\\';,./{}|":<>?';
   var string = username;
@@ -135,8 +139,14 @@ const ShortVideo = ({route, navigation}) => {
     )
       .then(response => response.json())
       .then(result => {
-        console.log(result, ' ---- Get Data API result...');
-
+        console.log(result?.Response?.videos, ' ---- Get daData API result...');
+        const datais = result?.Response?.videos;
+        let serverLinks = datais.filter(val => {
+          if (val.server_url) {
+            return val.server_url;
+          }
+        });
+        setServerLength(serverLinks.length);
         setSkelton(false);
         setWholeData(result?.Response);
         setApiRes(result?.Response?.videos);
@@ -444,13 +454,31 @@ const ShortVideo = ({route, navigation}) => {
         </SkeletonPlaceholder>
       ) : (
         <SwiperFlatList
-          ref={scrollRef}
+          nextButtonStyle={styles.nextButton}
+          prevButtonStyle={styles.prevButton}
+          ref={flatListRef}
           horizontal
           scrollEnabled={shouldShow ? false : true}
           data={apiRes}
           renderItem={({item, index}) => {
-            currIndex == index ? PostView(item.video_id) : null;
+            const isLastItem = index === apiRes.length - 1;
+            console.log(isLastItem, 'isLastItem');
+            const handleNext = () => {
+              flatListRef?.current?.scrollToIndex({
+                index: index + 1,
+                animated: true,
+              });
+            };
 
+            const handleBack = () => {
+              flatListRef?.current?.scrollToIndex({
+                index: index - 1,
+                animated: true,
+              });
+            };
+
+            currIndex == index ? PostView(item.video_id) : null;
+            console.log(item?.server_url, 'item?.server_url');
             console.log(currIndex, index, 'currIndex or Index');
 
             console.log(
@@ -514,7 +542,6 @@ const ShortVideo = ({route, navigation}) => {
                     onError={onError}
                     repeat
                     playWhenInactive={true}
-                    
                     // playInBackground={true}
                     // paused={currIndex !== index || shouldShow ? true : false}
                     // paused={currIndex !== index ? true : false}
@@ -524,7 +551,6 @@ const ShortVideo = ({route, navigation}) => {
                         ? false
                         : true
                     }
-                  
                     style={{width: wp('100'), height: windowHeight}}
                   />
                 </View>
@@ -935,6 +961,20 @@ const ShortVideo = ({route, navigation}) => {
                     </Box>
                   </Box>
                 ) : null}
+                {index > 0 && (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      bottom: hp('45'),
+                      left: wp('2'),
+                    }}>
+                    <Chevrons
+                      color={'#fff'}
+                      onPress={handleBack}
+                      IconName={'chevron-back'}
+                    />
+                  </View>
+                )}
                 <View
                   style={{
                     position: 'absolute',
@@ -966,6 +1006,21 @@ const ShortVideo = ({route, navigation}) => {
                     }
                   />
                 </View> */}
+
+                {!isLastItem && (
+                  <TouchableOpacity
+                    style={{
+                      position: 'absolute',
+                      bottom: hp('45'),
+                      right: wp('2'),
+                    }}>
+                    <Chevrons
+                      color={'#fff'}
+                      onPress={handleNext}
+                      IconName={'chevron-forward'}
+                    />
+                  </TouchableOpacity>
+                )}
                 {item?.shopify_url == '' ? null : (
                   <View
                     style={{
@@ -989,6 +1044,7 @@ const ShortVideo = ({route, navigation}) => {
                       onPress={() => AsyncStorage.clear()}
                       title={'clear storage'}
                     /> */}
+
                     <ShortBtn
                       style={{
                         backgroundColor:
@@ -1067,6 +1123,20 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+  },
+  nextButton: {
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  prevButton: {
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
   },
 });
 
