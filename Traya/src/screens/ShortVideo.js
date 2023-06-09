@@ -596,20 +596,6 @@ const ShortVideo = ({route, navigation}) => {
                     justifyContent: 'space-between',
                   }}>
                   <View style={{flexDirection: 'row'}}>
-                    {/* <TouchableOpacity
-                      // onPress={() => ReactNativeCustomModule.onStateChanged()}
-                      style={{alignItems: 'center', justifyContent: 'center'}}>
-                      <CustomIcon
-                        style={{
-                          marginHorizontal: wp('3'),
-                          marginVertical: hp('1'),
-                        }}
-                        name={'scan-outline'}
-                        color={'#fff'}
-                        size={25}
-                      />
-                    </TouchableOpacity> */}
-
                     <TouchableOpacity onPress={handlePasswordVisibility}>
                       <CustomIcon
                         style={{
@@ -714,11 +700,6 @@ const ShortVideo = ({route, navigation}) => {
                         </Stack>
 
                         <HStack alignItems="center" justifyContent={'center'}>
-                          {/* <Button
-                     title="Send"
-                     color="#b8d445"
-                     accessibilityLabel="ask questions from traya"
-                   /> */}
                           {sendRequest ? (
                             <Text style={{color: 'green'}}>
                               Your query is submitted. Thank you!
@@ -751,14 +732,6 @@ const ShortVideo = ({route, navigation}) => {
                                     setRegShow(true);
                                 }
                               }}
-                              // onPress={
-                              //   !async
-                              //     ? this.makeRemoteRequest.bind(this)
-                              //     : () =>
-                              //         Alert.alert(
-                              //           'Please fill the service detail first',
-                              //         )
-                              // }
                             >
                               <Text
                                 style={{
@@ -1028,23 +1001,6 @@ const ShortVideo = ({route, navigation}) => {
                       bottom: hp('1'),
                       right: wp('2'),
                     }}>
-                    {/* <ShortBtn
-                      style={{
-                        backgroundColor: 'red',
-                        paddingHorizontal: widthPercentageToDP('8'),
-                        paddingVertical: heightPercentageToDP('1.5'),
-                        borderRadius: 22,
-                      }}
-                      textStyle={{
-                        color: '#fff',
-                        fontSize: 15,
-                        fontWeight: '400',
-                      }}
-                      // onPress={() => RegisterObj.clearUser()}
-                      onPress={() => AsyncStorage.clear()}
-                      title={'clear storage'}
-                    /> */}
-
                     <ShortBtn
                       style={{
                         backgroundColor:
