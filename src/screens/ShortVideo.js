@@ -8,10 +8,6 @@ import {
   Text,
   StyleSheet,
   Dimensions,
-  Share,
-  ScrollView,
-  RefreshControl,
-  ActivityIndicator,
   TouchableOpacity,
   TextInput,
   Linking,
@@ -28,7 +24,7 @@ import Chevrons from '../components/Chevrons';
 import CustomIcon from '../components/Icon';
 import ShortBtn from '../components/ShortBtn';
 import {useTogglePasswordVisibility} from '../components/ShowHide';
-import {RegisterObj, userIdStorage} from '../Storage/AsyncStorage';
+import {RegisterObj} from '../Storage/AsyncStorage';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
@@ -49,7 +45,7 @@ const ShortVideo = ({route, navigation}) => {
   const [progress, setProgress] = useState(1);
   const [serverLength, setServerLength] = useState(0);
   const flatListRef = useRef({});
-
+  const [isSwipeOptDone, setIsSwipeOptDone] = useState(false);
   const [async, setAsync] = useState();
   const [username, setUsername] = React.useState('');
   const [sendRequest, setSendRequest] = useState(false);
@@ -57,18 +53,14 @@ const ShortVideo = ({route, navigation}) => {
   const [formattedValue, setFormattedValue] = useState('');
   const phoneInput = useRef(null);
   const [buffering, setBuffering] = useState(true);
-  // const [userId, setUserId] = useState('');
-  const [id, setId] = useState('');
+    const [id, setId] = useState('');
   const windowHeight = Dimensions.get('window').height;
-  console.log(id, '@useriddddd');
   function handleBackButtonClick() {
     navigation.goBack();
     setSkelton(false);
     return true;
   }
-  console.log(currIndex, 'currIndexcurrIndex');
 
-  console.log(userMsg, 'ewrewr');
   var regex = /\d+/g || '!@#$%^&*()+=-[]\\\';,./{}|":<>?';
   var string = username;
   var isNumeric = string.match(regex);
@@ -92,10 +84,10 @@ const ShortVideo = ({route, navigation}) => {
     sendRequest && setSendRequest(false);
     sendRequest && setShouldShow(false);
   }, 2000);
+  
   const {data} = route.params;
 
   // CUSTOM HOOKS
-
   const {
     rightIcon,
     handlePasswordVisibility,
@@ -105,11 +97,6 @@ const ShortVideo = ({route, navigation}) => {
     centerIcon,
   } = useTogglePasswordVisibility();
   const videoRef = useRef();
-  // useEffect(() => {
-  //   if (!!videoRef.current) {
-  //     videoRef.current.seek(0);
-  //   }
-  // }, [currIndex]);
   const onBuffer = ({isBuffering}) => {
     setBuffering(isBuffering);
   };
@@ -139,7 +126,6 @@ const ShortVideo = ({route, navigation}) => {
     )
       .then(response => response.json())
       .then(result => {
-        console.log(result?.Response?.videos, ' ---- Get daData API result...');
         const datais = result?.Response?.videos;
         let serverLinks = datais.filter(val => {
           if (val.server_url) {
@@ -173,7 +159,6 @@ const ShortVideo = ({route, navigation}) => {
     fetch('https://api.goswirl.live/index.php/Shopify/askque', requestOptions)
       .then(response => response.json())
       .then(result => {
-        console.log(result, 'dsfsfcsdfsdfsdf');
         setSendRequest(true);
         result?.success && setUserMsg('');
       })
@@ -183,6 +168,19 @@ const ShortVideo = ({route, navigation}) => {
   useEffect(() => {
     GetData();
   }, []);
+  useEffect(() => {
+    const updateSwipeOptStatus = async () => {
+      const swipeOptStatus = await AsyncStorage.getItem('isSwipeOptDone');
+        if (!swipeOptStatus) {
+          if (currIndex !== 0 && currIndex !== undefined) {
+          await AsyncStorage.setItem('isSwipeOptDone', 'true');
+        }
+      } 
+        setIsSwipeOptDone(swipeOptStatus);
+    };
+    updateSwipeOptStatus();
+  }, [currIndex,onChangeIndex]);
+
 
   const RegisterUser = (name, code, mobile) => {
     var myHeaders = new Headers();
@@ -206,7 +204,6 @@ const ShortVideo = ({route, navigation}) => {
     )
       .then(response => response.json())
       .then(async result => {
-        console.log(result?.data?.user_id, 'user registered');
         AsyncStorage.setItem('@storage_Key', result?.data?.user_id);
         setTimeout(() => {
           setRegShow(false);
@@ -240,28 +237,14 @@ const ShortVideo = ({route, navigation}) => {
       .then(result => console.log(result, 'postView'))
       .catch(error => console.log('error', error));
   };
-  //   useEffect(() => {
-  //     if (sendRequest) {
-  //       setShouldShow(false);
-  //       RegisterUser(username, formattedValue.replace(value, ''), value);
-  //       setSendRequest(false);
-  //     }
-  //   }, [sendRequest]);
+
   let localStorageData = RegisterObj.getUser();
 
   localStorageData.then(val => {
     setAsync(val);
-    console.log(val, '@local_storage');
   });
 
-  // let userIdReg = userIdStorage.getUser();
-
-  // userIdReg.then(e => {
-  //   // setId(e == true ? e : '');
-  //   console.log(e, '@abc');
-  // });
   const myData = AsyncStorage.getItem('@storage_Key');
-  console.log(myData, '@storage_Key');
   myData.then(e => {
     setId(e);
   });
@@ -457,12 +440,11 @@ const ShortVideo = ({route, navigation}) => {
           nextButtonStyle={styles.nextButton}
           prevButtonStyle={styles.prevButton}
           ref={flatListRef}
-          horizontal
+          vertical
           scrollEnabled={shouldShow ? false : true}
           data={apiRes}
           renderItem={({item, index}) => {
             const isLastItem = index === apiRes.length - 1;
-            console.log(isLastItem, 'isLastItem');
             const handleNext = () => {
               flatListRef?.current?.scrollToIndex({
                 index: index + 1,
@@ -478,40 +460,7 @@ const ShortVideo = ({route, navigation}) => {
             };
 
             currIndex == index ? PostView(item.video_id) : null;
-            console.log(item?.server_url, 'item?.server_url');
-            console.log(currIndex, index, 'currIndex or Index');
 
-            console.log(
-              id,
-              item?.designer_id,
-              userMsg,
-              item.video_id,
-              'details',
-            );
-
-            // const onShare = async () => {
-            //   try {
-            //     const result = await Share.share({
-            //       message: item?.server_url,
-            //     });
-            //     if (result.action === Share.sharedAction) {
-            //       if (result.activityType) {
-            //       } else {
-            //       }
-            //     } else if (result.action === Share.dismissedAction) {
-            //     }
-            //   } catch (error) {
-            //     alert(error.message);
-            //   }
-            // };
-            //SHARE FUNCTIONALITY
-            ////////////////////////////////////////////////////////////////////
-
-            ////////////////////////////////////////////////////////////////////
-
-            //INSIDE CARDS FUNCTIONALITY
-            ////////////////////////////////////////////////////////////////////
-            // console.log(index == 0 && currIndex == undefined, 'what is ppp');
             return (
               <>
                 <View
@@ -520,31 +469,20 @@ const ShortVideo = ({route, navigation}) => {
                     height: windowHeight,
                   }}>
                   <Video
-                    // playInBackground={true}
-                    // hideShutterView={true}
-                    // fullscreen={true}
-                    // // minLoadRetryCount={2}
-                    // // pictureInPicture={true}
-                    // onSeek={'0'}
                     onProgress={handleProgress}
                     muted={soundVis}
                     seekColor="#a146b7"
                     source={{
                       uri: item?.server_url,
                     }}
-                    // onSeek={data => console.log('onSeek', data)}
                     poster={item?.cover_image}
                     posterResizeMode={'cover'}
-                    // playInBackground={true}
                     ref={videoRef}
                     resizeMode="contain"
                     onBuffer={onBuffer}
                     onError={onError}
                     repeat
                     playWhenInactive={true}
-                    // playInBackground={true}
-                    // paused={currIndex !== index || shouldShow ? true : false}
-                    // paused={currIndex !== index ? true : false}
                     paused={
                       (index == 0 && currIndex == undefined) ||
                       currIndex == index
@@ -718,7 +656,6 @@ const ShortVideo = ({route, navigation}) => {
                                 borderRadius: 22,
                               }}
                               onPress={() => {
-                                console.log(item?.video_id, '5555');
 
                                 if (!async) {
                                   setRegShow(true);
@@ -776,9 +713,6 @@ const ShortVideo = ({route, navigation}) => {
                         backgroundColor: 'gray.50',
                       }}>
                       <Box>
-                        {/* <View style={{backgroundColor: 'red', width: '100%'}}>
-                   <Text>jsdnfkdf</Text>
-                 </View> */}
                         <View
                           style={{
                             backgroundColor:
@@ -848,12 +782,9 @@ const ShortVideo = ({route, navigation}) => {
                             }}
                             containerStyle={{
                               width: wp('80'),
-                              // marginVertical: hp('1'),
-                              // height: hp('8'),
                             }}
                             textInputProps={{
                               maxLength: 10,
-                              // marginBottom: -4,
                               keyboardType: 'number-pad',
                             }}
                             textInputStyle={{
@@ -864,11 +795,6 @@ const ShortVideo = ({route, navigation}) => {
                         </Stack>
 
                         <HStack alignItems="center" justifyContent={'center'}>
-                          {/* <Button
-                     title="Send"
-                     color="#b8d445"
-                     accessibilityLabel="ask questions from traya"
-                   /> */}
                           {sendRequest ? (
                             <Text style={{color: 'green'}}>
                               Your query is submitted. Thank you!
@@ -934,20 +860,7 @@ const ShortVideo = ({route, navigation}) => {
                     </Box>
                   </Box>
                 ) : null}
-                {index > 0 && (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      bottom: hp('45'),
-                      left: wp('2'),
-                    }}>
-                    <Chevrons
-                      color={'#fff'}
-                      onPress={handleBack}
-                      IconName={'chevron-back'}
-                    />
-                  </View>
-                )}
+            
                 <View
                   style={{
                     position: 'absolute',
@@ -961,39 +874,27 @@ const ShortVideo = ({route, navigation}) => {
                     }}
                   />
                 </View>
-                {/* <View
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    alignSelf: 'center',
-                    right: 12,
-                  }}>
-                  <ActivityIndicator
-                    animating
-                    size="large"
-                    color={wholeData?.customizationData?.bk_color_buy_btn}
-                    style={
-                      currIndex == index && buffering
-                        ? {opacity: 1}
-                        : {opacity: 0}
-                    }
-                  />
-                </View> */}
-
-                {!isLastItem && (
-                  <TouchableOpacity
+               {!isSwipeOptDone &&
+                (currIndex == undefined || currIndex == 0) && (
+                  <View
                     style={{
                       position: 'absolute',
-                      bottom: hp('45'),
-                      right: wp('2'),
+                      bottom: 10,
+                      justifyContent: 'center',
+                      alignItems: 'center',
                     }}>
-                    <Chevrons
-                      color={'#fff'}
-                      onPress={handleNext}
-                      IconName={'chevron-forward'}
+                    <Image
+                      source={require('../assets/swipe-up-arrow.gif')}
+                      style={{
+                        width: wp('100'),
+                        height: wp('12'),
+                        resizeMode: 'contain',
+                      }}
                     />
-                  </TouchableOpacity>
+                  </View>
                 )}
+
+               
                 {item?.shopify_url == '' ? null : (
                   <View
                     style={{
@@ -1015,7 +916,6 @@ const ShortVideo = ({route, navigation}) => {
                         fontSize: 15,
                         fontWeight: '400',
                       }}
-                      // onPress={() => RegisterObj.clearUser()}
                       onPress={() => Linking.openURL(item?.shopify_url)}
                       title={'Take The Hair Test'}
                     />

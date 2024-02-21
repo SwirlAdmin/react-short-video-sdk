@@ -85,12 +85,12 @@ const HomeScreen = props => {
         style={{flex: 1}}
         data={rrr}
         showsVerticalScrollIndicator={false}
-        renderItem={item => {
+        renderItem={(item,index) => {
           console.log(item?.item, 'hedfdsfyyy');
           return (
             <TouchableOpacity
               onPress={() =>
-                props.navigation.navigate('SVideo', {data: item?.item})
+                props.navigation.navigate('SVideo', {data: item?.item, index:index})
               }
               activeOpacity={0.6}
               style={{
