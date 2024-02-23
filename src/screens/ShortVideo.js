@@ -1,5 +1,13 @@
 //import liraries
-import {Box, HStack, Stack, TextArea} from 'native-base';
+import {
+  Box,
+  Center,
+  HStack,
+  Progress,
+  Slider,
+  Stack,
+  TextArea,
+} from 'native-base';
 import React, {useEffect, useRef, useState} from 'react';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -42,7 +50,19 @@ const ShortVideo = ({route, navigation}) => {
   const [shouldShow, setShouldShow] = useState(false);
   const [regShow, setRegShow] = useState(false);
   const [wholeData, setWholeData] = React.useState('');
-  const [progress, setProgress] = useState(1);
+  const [progress, setProgress] = useState(0);
+  const [currentPlayTime, setCurrentPlayTime] = useState(0);
+  const [seekableDuration, setSeekableDuration] = useState(0);
+  const [play, setPlay] = useState(true);
+  // const handleProgress = progressData => {
+  //   console.log(progressData, '===proressData');
+  //   setSeekableDuration(progressData.seekableDuration * 100);
+  //   setCurrentPlayTime(progressData.currentTime * 100);
+  //   setProgress(
+  //     (progressData.currentTime / progressData.seekableDuration) * 100,
+  //   );
+  // };
+
   const [serverLength, setServerLength] = useState(0);
   const flatListRef = useRef({});
   const [isSwipeOptDone, setIsSwipeOptDone] = useState(false);
@@ -53,7 +73,7 @@ const ShortVideo = ({route, navigation}) => {
   const [formattedValue, setFormattedValue] = useState('');
   const phoneInput = useRef(null);
   const [buffering, setBuffering] = useState(true);
-    const [id, setId] = useState('');
+  const [id, setId] = useState('');
   const windowHeight = Dimensions.get('window').height;
   function handleBackButtonClick() {
     navigation.goBack();
@@ -68,9 +88,6 @@ const ShortVideo = ({route, navigation}) => {
     const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
     return specialChars.test(str);
   };
-  const handleProgress = progress => {
-    setProgress(progress.atValue);
-  };
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', handleBackButtonClick);
     return () => {
@@ -84,7 +101,7 @@ const ShortVideo = ({route, navigation}) => {
     sendRequest && setSendRequest(false);
     sendRequest && setShouldShow(false);
   }, 2000);
-  
+
   const {data} = route.params;
 
   // CUSTOM HOOKS
@@ -164,6 +181,11 @@ const ShortVideo = ({route, navigation}) => {
       })
       .catch(error => console.log('error', error));
   };
+  useEffect(() => {
+    if (currIndex !== undefined && videoRef.current) {
+      videoRef.current.seek(0);
+    }
+  }, [currIndex]);
 
   useEffect(() => {
     GetData();
@@ -171,16 +193,15 @@ const ShortVideo = ({route, navigation}) => {
   useEffect(() => {
     const updateSwipeOptStatus = async () => {
       const swipeOptStatus = await AsyncStorage.getItem('isSwipeOptDone');
-        if (!swipeOptStatus) {
-          if (currIndex !== 0 && currIndex !== undefined) {
+      if (!swipeOptStatus) {
+        if (currIndex !== 0 && currIndex !== undefined) {
           await AsyncStorage.setItem('isSwipeOptDone', 'true');
         }
-      } 
-        setIsSwipeOptDone(swipeOptStatus);
+      }
+      setIsSwipeOptDone(swipeOptStatus);
     };
     updateSwipeOptStatus();
-  }, [currIndex,onChangeIndex]);
-
+  }, [currIndex, onChangeIndex]);
 
   const RegisterUser = (name, code, mobile) => {
     var myHeaders = new Headers();
@@ -250,6 +271,22 @@ const ShortVideo = ({route, navigation}) => {
   });
   const onChangeIndex = ({index}) => {
     setIndex(index);
+  };
+  const formatTime = time => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(
+      2,
+      '0',
+    )}`;
+  };
+
+  const currentTimeFormatted = formatTime(progress.currentTime);
+  const seekableDurationFormatted = formatTime(progress.seekableDuration);
+  const timeDisplay = `${currentTimeFormatted}/${seekableDurationFormatted}`;
+
+  const padTime = time => {
+    return time < 10 ? `0${time}` : time;
   };
 
   return (
@@ -444,21 +481,6 @@ const ShortVideo = ({route, navigation}) => {
           scrollEnabled={shouldShow ? false : true}
           data={apiRes}
           renderItem={({item, index}) => {
-            const isLastItem = index === apiRes.length - 1;
-            const handleNext = () => {
-              flatListRef?.current?.scrollToIndex({
-                index: index + 1,
-                animated: true,
-              });
-            };
-
-            const handleBack = () => {
-              flatListRef?.current?.scrollToIndex({
-                index: index - 1,
-                animated: true,
-              });
-            };
-
             currIndex == index ? PostView(item.video_id) : null;
 
             return (
@@ -469,7 +491,12 @@ const ShortVideo = ({route, navigation}) => {
                     height: windowHeight,
                   }}>
                   <Video
-                    onProgress={handleProgress}
+                    onLoad={() => {
+                      videoRef?.current?.seek(0);
+                    }}
+                    onProgress={x => {
+                      setProgress(x);
+                    }}
                     muted={soundVis}
                     seekColor="#a146b7"
                     source={{
@@ -484,8 +511,8 @@ const ShortVideo = ({route, navigation}) => {
                     repeat
                     playWhenInactive={true}
                     paused={
-                      (index == 0 && currIndex == undefined) ||
-                      currIndex == index
+                      (play && index == 0 && currIndex == undefined) ||
+                      (play && currIndex == index)
                         ? false
                         : true
                     }
@@ -656,7 +683,6 @@ const ShortVideo = ({route, navigation}) => {
                                 borderRadius: 22,
                               }}
                               onPress={() => {
-
                                 if (!async) {
                                   setRegShow(true);
                                 } else {
@@ -668,8 +694,7 @@ const ShortVideo = ({route, navigation}) => {
                                   ),
                                     setRegShow(true);
                                 }
-                              }}
-                            >
+                              }}>
                               <Text
                                 style={{
                                   color:
@@ -860,22 +885,99 @@ const ShortVideo = ({route, navigation}) => {
                     </Box>
                   </Box>
                 ) : null}
-            
+
                 <View
                   style={{
                     position: 'absolute',
                     bottom: 0,
                     left: 0,
+                    width: '100%',
+                    alignItems: 'center',
                   }}>
-                  <BottomBtns
-                    // sharePress={onShare}
-                    chatPress={() => {
-                      setShouldShow(true);
-                    }}
-                  />
+                  <View style={{alignSelf: 'flex-start'}}>
+                    <BottomBtns
+                      chatPress={() => {
+                        setShouldShow(true);
+                      }}
+                    />
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <Slider
+                      style={{width: '60%', height: 40}}
+                      minimumValue={0}
+                      maximumValue={seekableDuration}
+                      value={progress.currentTime}
+                      minimumTrackTintColor="#FFFFFF"
+                      maximumTrackTintColor="#000000"
+                      thumbTintColor="#FFFFFF">
+                      <Slider.Track>
+                        <Slider.FilledTrack />
+                      </Slider.Track>
+                      <Slider.Thumb />
+                    </Slider>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      position: 'absolute',
+                      top: '50%',
+                      transform: [{translateY: -333}],
+                    }}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        videoRef?.current?.seek(parseInt(progress - 10))
+                      }>
+                      <Image
+                        style={{
+                          width: 30,
+                          height: 30,
+                          tintColor: '#fff',
+                          marginHorizontal: 30,
+                        }}
+                        source={require('../assets/replay.png')}
+                      />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => setPlay(!play)}>
+                      <Image
+                        style={{
+                          width: 30,
+                          height: 30,
+                          tintColor: '#fff',
+                          marginHorizontal: 30,
+                        }}
+                        source={
+                          play
+                            ? require('../assets/pause.png')
+                            : require('../assets/play.png')
+                        }
+                      />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() =>
+                        videoRef?.current?.seek(parseInt(progress + 10))
+                      }>
+                      <Image
+                        style={{
+                          width: 30,
+                          height: 30,
+                          tintColor: '#fff',
+                          marginHorizontal: 30,
+                        }}
+                        source={require('../assets/rewind.png')}
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-               {!isSwipeOptDone &&
-                (currIndex == undefined || currIndex == 0) && (
+
+                {!isSwipeOptDone && (currIndex == undefined || currIndex == 0) && (
                   <View
                     style={{
                       position: 'absolute',
@@ -894,7 +996,6 @@ const ShortVideo = ({route, navigation}) => {
                   </View>
                 )}
 
-               
                 {item?.shopify_url == '' ? null : (
                   <View
                     style={{
@@ -909,6 +1010,7 @@ const ShortVideo = ({route, navigation}) => {
                         paddingHorizontal: widthPercentageToDP('8'),
                         paddingVertical: heightPercentageToDP('1.5'),
                         borderRadius: 22,
+                        bottom: 30,
                       }}
                       textStyle={{
                         color:

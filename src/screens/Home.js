@@ -71,7 +71,6 @@ const HomeScreen = props => {
   const rrr = dummydata.filter(e => {
     return e.accessToken;
   });
-  console.log(rrr, 'converted dummy data');
 
   return (
     <View style={{flex: 1}}>
@@ -86,7 +85,6 @@ const HomeScreen = props => {
         data={rrr}
         showsVerticalScrollIndicator={false}
         renderItem={(item,index) => {
-          console.log(item?.item, 'hedfdsfyyy');
           return (
             <TouchableOpacity
               onPress={() =>
